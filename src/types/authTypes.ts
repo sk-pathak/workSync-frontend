@@ -1,4 +1,4 @@
-import { User } from "./userTypes";
+import { UserRes } from "./userTypes";
 
 export type RegisterUser = {
   name: string;
@@ -7,12 +7,13 @@ export type RegisterUser = {
   password: string;
 }
 
-export type Res= {
+export type Response = {
   token: string;
   message: string;
-  'status code': number;
-  'expiration time': string;
+  statusCode: number;
+  expirationTime: string;
+  role: string;
+  user: UserRes
 }
-export type Response = Res & User;
 
 export type AuthStatus = "authorized" | "unauthorized" | "loading";

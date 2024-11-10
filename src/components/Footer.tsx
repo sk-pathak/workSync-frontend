@@ -36,8 +36,8 @@ const Footer: React.FC = () => {
 
       <div>
         <h2 className="footer-title">Contact</h2>
-        <p>Email: support@example.com</p>
-        <p>Phone: +1 234 567 890</p>
+        <p>Email: sumitpathak2002@gamil.com</p>
+        <p>Phone: +91 830 631 2679</p>
       </div>
     </footer>
   );

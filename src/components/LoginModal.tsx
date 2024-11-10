@@ -1,29 +1,36 @@
 import React, { useState } from "react";
-import { useAuthStore } from "../stores/authStore";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore, useModalStore } from "../stores";
 
-type LoginModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
-
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
+const LoginModal: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const login = useAuthStore().login;
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(username, password);
-    onClose();
+    await login(username, password, navigate);
+    setUsername("");
+    setPassword("");
+
+    closeModal("login");
+    navigate("/");
   };
+
+  const { modals, openModal, closeModal } = useModalStore();
 
   return (
     <>
-      {isOpen && (
+      {modals.login && (
         <div
-          className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-85'
-          onClick={onClose}
+          role='dialog'
+          aria-labelledby='login-modal-title'
+          aria-hidden={!modals.login}
+          aria-modal={true}
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/85'
+          onClick={() => closeModal("login")}
         >
           <div
             className='w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-lg'
@@ -59,7 +66,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 <button
                   className='link'
                   onClick={() => {
-                    onClose();
+                    closeModal("login");
+                    openModal("signup");
                   }}
                 >
                   Sign Up

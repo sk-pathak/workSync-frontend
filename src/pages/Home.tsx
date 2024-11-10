@@ -1,17 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import SignupModal from "../components/SignupModal";
 import LoginModal from "../components/LoginModal";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useAuthStore } from "../stores/authStore";
+import { useAuthStore } from "../stores";
+import CardList from "../components/CardList";
 
 const Home: React.FC = () => {
-  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
-  const [isSignupModalOpen, setSignupModalOpen] = useState(false);
-
-  const closeLoginModal = () => setLoginModalOpen(false);
-  const closeSignupModal = () => setSignupModalOpen(false);
-
+  
   const scroll = () => {
     const element = document.querySelector('.projects');
     element?.scrollIntoView({
@@ -19,7 +15,9 @@ const Home: React.FC = () => {
     });
   }
 
-  const isLoggedIn = useAuthStore((state) => state.status === "authorized");
+  const store = useAuthStore();
+  const isLoggedIn = store.status==='authorized';
+  const name = store.user?.name;
 
   return (
     <>
@@ -29,7 +27,8 @@ const Home: React.FC = () => {
           <h1 className='text-5xl font-bold'>Welcome to WorkSync</h1>
           <p className='py-6 text-lg'>
             A simple platform to create, manage, and collaborate on projects.
-            Whether you're an individual or a team, we've got you covered!
+            Whether you're an individual or a team, we've got you covered!{" "}
+            {isLoggedIn ? name : ""}
           </p>
           <img
             src='../src/assets/team.svg'
@@ -38,17 +37,11 @@ const Home: React.FC = () => {
           />
         </div>
 
-        <LoginModal
-          isOpen={isLoginModalOpen}
-          onClose={closeLoginModal}
-        />
-        <SignupModal
-          isOpen={isSignupModalOpen}
-          onClose={closeSignupModal}
-        />
+        <LoginModal />
+        <SignupModal />
       </div>
       <button className="btn btn-primary" onClick={scroll}>Find your projects now!!</button>
-      <div className="projects">Project div</div>
+      <CardList />
       <Footer />
     </>
   );

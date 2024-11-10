@@ -1,18 +1,17 @@
 import React, { useState } from "react";
-import { useAuthStore } from "../stores/authStore";
+import { useAuthStore, useModalStore } from "../stores";
+import { useNavigate } from "react-router-dom";
 
-type SingupModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
-
-const SignupModal: React.FC<SingupModalProps> = ({ isOpen, onClose }) => {
+const SignupModal: React.FC = () => {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const signup = useAuthStore().register;
+  const navigate = useNavigate();
+
+  const { modals, openModal, closeModal } = useModalStore();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +22,23 @@ const SignupModal: React.FC<SingupModalProps> = ({ isOpen, onClose }) => {
       password,
     };
 
-    await signup(data);
+    await signup(data, navigate);
 
-    onClose();
+    setName("");
+    setEmail("");
+    setUsername("");
+    setPassword("");
+
+    closeModal('signup');
+    navigate("/");
   };
 
   return (
     <>
-      {isOpen && (
+      {modals.signup && (
         <div
-          className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-85'
-          onClick={onClose}
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/85'
+          onClick={() => closeModal('signup')}
         >
           <div
             className='w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-lg'
@@ -85,7 +90,8 @@ const SignupModal: React.FC<SingupModalProps> = ({ isOpen, onClose }) => {
                 <button
                   className='link'
                   onClick={() => {
-                    onClose();
+                    closeModal('signup');
+                    openModal('login');
                   }}
                 >
                   Login
