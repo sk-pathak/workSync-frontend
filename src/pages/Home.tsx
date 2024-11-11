@@ -1,9 +1,10 @@
 import React from "react";
 import SignupModal from "../components/SignupModal";
 import LoginModal from "../components/LoginModal";
+import NewProjectModal from "../components/NewProjectModal";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useAuthStore } from "../stores";
+import { useAuthStore, useModalStore } from "../stores";
 import CardList from "../components/CardList";
 
 const Home: React.FC = () => {
@@ -15,6 +16,11 @@ const Home: React.FC = () => {
     });
   }
 
+  const handleClick = () => {
+    isLoggedIn ? openModal('newProject') : openModal('login');
+  }
+
+  const { openModal } = useModalStore();
   const store = useAuthStore();
   const isLoggedIn = store.status==='authorized';
   const name = store.user?.name;
@@ -39,8 +45,10 @@ const Home: React.FC = () => {
 
         <LoginModal />
         <SignupModal />
+        <NewProjectModal />
       </div>
-      <button className="btn btn-primary" onClick={scroll}>Find your projects now!!</button>
+      <div className='text-2xl font-semibold mt-4 cursor-pointer inline-block' onClick={scroll}>Get Started & find over 1000 projects!!!</div>
+      <button className="btn btn-primary" onClick={handleClick}>Create a new project</button>
       <CardList />
       <Footer />
     </>

@@ -8,7 +8,6 @@ import {
 import { getProjects } from "../services/projectService";
 
 const CardList = () => {
-  
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const { status, data, error, isPlaceholderData } = useQuery({
@@ -29,23 +28,6 @@ const CardList = () => {
 
   return (
     <>
-      <button
-        className='inline-block cursor-pointer rounded-md bg-gray-800 px-4 py-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out hover:bg-gray-900'
-        onClick={() => setPage((old) => Math.max(old - 1, 0))}
-        disabled={page === 0}
-      >
-        Prev
-      </button>{" "}
-      <span>Page {page + 1}</span>{" "}
-      <button
-        className='inline-block cursor-pointer rounded-md bg-gray-800 px-4 py-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out hover:bg-gray-900'
-        onClick={() => {
-          setPage((old) => (data?.hasMore ? old + 1 : old));
-        }}
-        disabled={isPlaceholderData || !data?.hasMore}
-      >
-        Next
-      </button>
       <div className='space-y-4'>
         {status === "pending" ? (
           <div>Loading...</div>
@@ -62,6 +44,24 @@ const CardList = () => {
           </div>
         )}
       </div>
+
+      <button
+        className='inline-block cursor-pointer rounded-md bg-gray-800 px-4 py-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50'
+        onClick={() => setPage((old) => Math.max(old - 1, 0))}
+        disabled={page === 0}
+      >
+        Prev
+      </button>{" "}
+      <span>Page {page + 1}</span>{" "}
+      <button
+        className='inline-block cursor-pointer rounded-md bg-gray-800 px-4 py-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50'
+        onClick={() => {
+          setPage((old) => (data?.hasMore ? old + 1 : old));
+        }}
+        disabled={isPlaceholderData || !data?.hasMore}
+      >
+        Next
+      </button>
     </>
   );
 };

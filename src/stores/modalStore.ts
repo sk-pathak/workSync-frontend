@@ -10,6 +10,7 @@ export const useModalStore = create<ModalState>((set) => ({
   modals: {
     signup: false,
     login: false,
+    newProject: false,
   },
   openModal: (modalName: string) => set((state) => ({
     modals: { ...state.modals, [modalName]: true },

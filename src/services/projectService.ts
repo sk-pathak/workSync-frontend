@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import { configApi } from "../api/configApi";
-import { Project, ProjectResponse } from "../types/projectTypes.ts";
+import { ProjectResponse } from "../types/projectTypes.ts";
 
 export const getProjects = async (page: number, limit: number=3): Promise<ProjectResponse> => {
   try {
@@ -16,9 +16,9 @@ export const getProjects = async (page: number, limit: number=3): Promise<Projec
   }
 }
 
-export const createProject = async (dataProject: Project): Promise<ProjectResponse> => {
+export const createProject = async (formData: FormData): Promise<ProjectResponse> => {
   try {
-    const { data } = await configApi.post<ProjectResponse>('/api/projects/create', dataProject);
+    const { data } = await configApi.post<ProjectResponse>('/api/projects/create', formData);
     return data;
   } catch (error) {
     if (error instanceof AxiosError) {
