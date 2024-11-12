@@ -1,11 +1,12 @@
 import { CardType } from "../types/cardType";
 
 const ProjectCard = ({ projectName, projectDescription, projectImageLink, stars, tags }: CardType) => {
+  const imagePath = `../${projectImageLink}`;
   return (
     <div className='card w-96 bg-base-100 shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl border border-gray-200 rounded-lg overflow-hidden'>
       <figure className='relative'>
         <img
-          src={projectImageLink}
+          src={imagePath}
           alt={projectName}
           className='w-full h-48 object-cover rounded-t-lg transition-transform duration-300 ease-in-out hover:scale-110 hover:brightness-75'
         />

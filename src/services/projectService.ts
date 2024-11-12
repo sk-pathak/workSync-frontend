@@ -2,7 +2,7 @@ import { AxiosError } from "axios";
 import { configApi } from "../api/configApi";
 import { ProjectResponse } from "../types/projectTypes.ts";
 
-export const getProjects = async (page: number, limit: number=3): Promise<ProjectResponse> => {
+export const getProjects = async (page: number, limit: number=4): Promise<ProjectResponse> => {
   try {
     const { data } = await configApi.get<ProjectResponse>(`/api/projects/all?page=${page}&size=${limit}`);
     return data;
