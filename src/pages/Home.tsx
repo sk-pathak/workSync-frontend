@@ -4,12 +4,11 @@ import LoginModal from "../components/LoginModal";
 import NewProjectModal from "../components/NewProjectModal";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useAuthStore, useModalStore, useSearchStore } from "../stores";
+import { useAuthStore, useModalStore } from "../stores";
 import CardList from "../components/CardList";
 import Spinner from "../components/Spinner";
 import SearchBar from "../components/SearchBar";
 import FilterBox from "../components/FilterBox";
-import SearchedList from "../components/SearchedList";
 import Sort from "../components/Sort";
 
 const Home: React.FC = () => {
@@ -28,8 +27,6 @@ const Home: React.FC = () => {
   const store = useAuthStore();
   const isLoggedIn = store.status === "authorized";
   const name = store.user?.name;
-
-  const searchTerm = useSearchStore().searchTerm;
 
   return (
     <>
@@ -79,7 +76,7 @@ const Home: React.FC = () => {
 
       <div className='flex mt-10 mb-10'>
         <FilterBox />
-        {searchTerm !== "" ? <SearchedList /> : <CardList />}
+        <CardList />
       </div>
 
       <Footer />

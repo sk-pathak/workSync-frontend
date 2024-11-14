@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useSearchStore } from "../stores";
+import { useProjectStore } from "../stores";
 import { debounce } from "lodash";
 
 const SearchBar = () => {
-  const { searchTerm, setSearchTerm } = useSearchStore();
+  const { searchTerm, setSearchTerm } = useProjectStore();
   const [input, setInput] = useState(searchTerm);
 
   const debouncedSearch = debounce((term: string) => {

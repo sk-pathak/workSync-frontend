@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import { configApi } from "../api/configApi";
-import { RegisterUser, Response } from "../types/authTypes";
+import { Response } from "../types/authTypes";
 
 export const login = async (username: string, password: string): Promise<Response> => {
   try {
