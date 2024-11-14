@@ -5,6 +5,7 @@ export type RegisterUser = {
   username: string;
   email: string;
   password: string;
+  userProfile: string;
 }
 
 export type Response = {

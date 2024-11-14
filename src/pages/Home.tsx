@@ -4,10 +4,13 @@ import LoginModal from "../components/LoginModal";
 import NewProjectModal from "../components/NewProjectModal";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useAuthStore, useModalStore } from "../stores";
+import { useAuthStore, useModalStore, useSearchStore } from "../stores";
 import CardList from "../components/CardList";
 import Spinner from "../components/Spinner";
 import SearchBar from "../components/SearchBar";
+import FilterBox from "../components/FilterBox";
+import SearchedList from "../components/SearchedList";
+import Sort from "../components/Sort";
 
 const Home: React.FC = () => {
   const scroll = () => {
@@ -25,6 +28,8 @@ const Home: React.FC = () => {
   const store = useAuthStore();
   const isLoggedIn = store.status === "authorized";
   const name = store.user?.name;
+
+  const searchTerm = useSearchStore().searchTerm;
 
   return (
     <>
@@ -52,15 +57,14 @@ const Home: React.FC = () => {
       <div className='flex pb-5'>
         <Spinner />
         <div className='w-full sm:w-3/5 ml-4'>
-          <div
-            className='text-2xl text-center font-semibold mt-10 cursor-pointer hover:text-purple-500 transition-all duration-200'
-            onClick={scroll}
-          >
-            Get Started & find over 1000 projects!!!, or
+          <div className='text-2xl text-center font-semibold mt-10'>
+            <span onClick={scroll} className='inline cursor-pointer hover:text-purple-500 transition-all duration-200'>
+              Get Started & find over 1000 projects!!!, or
+            </span>
           </div>
           <div className='mt-10 flex justify-center'>
             <button
-              className='btn btn-primary w-full sm:w-auto'
+              className='btn btn-primary bg-purple-500 hover:bg-purple-600 w-full sm:w-auto'
               onClick={handleClick}
             >
               Create a new project
@@ -68,11 +72,14 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
+      <div className='flex mt-10 pl-24'>
+        <SearchBar />
+        <Sort />
+      </div>
 
-      <SearchBar />
       <div className='flex mt-10 mb-10'>
-        <div className="w-2/5 flex justify-center">Filter box here</div>
-        <CardList />
+        <FilterBox />
+        {searchTerm !== "" ? <SearchedList /> : <CardList />}
       </div>
 
       <Footer />

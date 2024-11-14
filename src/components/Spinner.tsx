@@ -23,7 +23,7 @@ const Spinner = () => {
         alt='Spinning'
         style={{
           ...styles.image,
-          transform: `rotate(${rotation}deg)`,
+          transform: `rotate(-${rotation}deg)`
         }}
       />
     </div>

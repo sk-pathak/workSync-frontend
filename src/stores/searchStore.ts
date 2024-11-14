@@ -1,11 +1,16 @@
-import { create } from "zustand";
+import { create } from 'zustand';
+import { Project } from '../types/projectTypes';
 
-type SearchState = {
-  search: string;
-  setSearch: (search: string) => void;
+type SearchStoreState = {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  projects: Project[];
+  setProjects: (projects: Project[]) => void;
 };
 
-export const useSearchStore = create<SearchState>((set) => ({
-  search: "",
-  setSearch: (search) => set({ search }),
+export const useSearchStore = create<SearchStoreState>((set) => ({
+  searchTerm: '',
+  setSearchTerm: (term) => set({ searchTerm: term }),
+  projects: [],
+  setProjects: (projects) => set({ projects }),
 }));

@@ -1,6 +1,6 @@
 import { StateCreator, create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { AuthStatus, RegisterUser, Response } from "../types/authTypes";
+import { AuthStatus, Response } from "../types/authTypes";
 import { UserRes } from "../types/userTypes";
 import * as AuthService from "../services/authService";
 import { toast } from "react-toastify";
@@ -13,7 +13,7 @@ export type AuthState = {
 
   login: (email: string, password: string, navigate: Function) => Promise<void>;
   logout: (navigate: Function) => void;
-  register: (data: RegisterUser, navigate: Function) => Promise<void>;
+  register: (data: FormData, navigate: Function) => Promise<void>;
 }
 
 const storeApi: StateCreator<AuthState> = (set) => ({
@@ -38,9 +38,9 @@ const storeApi: StateCreator<AuthState> = (set) => ({
     toast.info("Logged out successfully");
     navigate("/");
   },
-  register: async (data: RegisterUser, navigate: Function) => {
+  register: async (formData: FormData, navigate: Function) => {
     try {
-      const res = await AuthService.register(data);
+      const res = await AuthService.register(formData);
       const token = res.token;
       const user = res.user;
       set({ status: "authorized", token, user });

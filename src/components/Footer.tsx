@@ -1,34 +1,35 @@
 import React from "react";
 import { FaGithub, FaLinkedin, FaReddit } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import logo from '/banner-nobg.svg';
 
 const Footer: React.FC = () => {
   return (
-    <footer className='footer p-10 bg-base-200 text-base-content mt-10'>
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-16'>
+    <footer className='footer p-10 pt-0 bg-base-200 text-base-content mt-10'>
+      <div className='grid grid-cols-1 pt-12 pr-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-14'>
         {/* Company Section */}
         <div>
           <h2 className='footer-title'>Company</h2>
           <ul className='space-y-2'>
             <li>
-              <a
-                href='#'
-                className='link link-hover no-underline hover:text-purple-600 transition'
+              <Link
+                to='/'
+                className='link no-underline hover:text-purple-600 transform hover:p-2 transition-all duration-300'
               >
                 Home
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href='#'
-                className='link link-hover no-underline hover:text-purple-600 transition'
+              <Link to="/aboutme"
+                className='link no-underline hover:text-purple-600 transform hover:p-2 transition-all duration-300'
               >
                 About
-              </a>
+              </Link>
             </li>
             <li>
               <a
                 href='#'
-                className='link link-hover no-underline hover:text-purple-600 transition'
+                className='link no-underline hover:text-purple-600 transform hover:p-2 transition-all duration-300'
               >
                 Services
               </a>
@@ -36,7 +37,7 @@ const Footer: React.FC = () => {
             <li>
               <a
                 href='#'
-                className='link link-hover no-underline hover:text-purple-600 transition'
+                className='link no-underline hover:text-purple-600 transform hover:p-2 transition-all duration-300'
               >
                 Contact
               </a>
@@ -49,7 +50,7 @@ const Footer: React.FC = () => {
           <h2 className='footer-title'>Follow Us</h2>
           <div className='flex space-x-4'>
             <a
-              href='https://github.com'
+              href='https://github.com/sk-pathak'
               target='_blank'
               rel='noopener noreferrer'
               aria-label='GitHub'
@@ -82,14 +83,17 @@ const Footer: React.FC = () => {
             Email:{" "}
             <a
               href='mailto:sumitpathak2002@gmail.com'
-              className='link link-hover'
+              className='link no-underline hover:text-purple-400 transition-transform duration-300 transform hover:translate-x-2'
             >
               sumitpathak2002@gmail.com
             </a>
           </p>
           <p>
             Phone:{" "}
-            <a href='tel:+918306312679' className='link link-hover'>
+            <a
+              href='tel:+918306312679'
+              className='link no-underline hover:text-purple-400 transition-transform duration-300 transform hover:translate-x-2'
+            >
               +91 830 631 2679
             </a>
           </p>
@@ -97,7 +101,8 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Bottom text */}
-      <div className='mt-10 text-center text-lg text-base-content'>
+      <div className='flex items-center pt-4 justify-between text-lg text-base-content'>
+        <img src={logo} alt="Logo" className='h-40 w-auto pr-10' />
         <p>© 2024 WorkSync. All rights reserved.</p>
       </div>
     </footer>

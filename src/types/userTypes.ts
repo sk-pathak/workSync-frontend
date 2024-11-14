@@ -11,4 +11,5 @@ export type UserRes = {
   userId: number;
   name: string;
   email: string;
+  userProfile: string;
 }

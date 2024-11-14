@@ -16,9 +16,9 @@ export const login = async (username: string, password: string): Promise<Respons
   }
 }
 
-export const register = async (dataUser: RegisterUser): Promise<Response> => {
+export const register = async (formData: FormData): Promise<Response> => {
   try {
-    const { data } = await configApi.post<Response>('/api/register', dataUser);
+    const { data } = await configApi.post<Response>('/api/register', formData);
     return data;
   } catch (error) {
     if (error instanceof AxiosError) {

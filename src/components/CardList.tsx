@@ -7,9 +7,11 @@ import {
 } from "@tanstack/react-query";
 import { getProjects } from "../services/projectService";
 import { IoIosArrowDropright, IoIosArrowDropleft } from "react-icons/io";
+import { useSearchStore } from "../stores";
 
 const CardList = () => {
   const queryClient = useQueryClient();
+  const searchTerm = useSearchStore().searchTerm;
   const [page, setPage] = useState(0);
 
   const { status, data, error, isPlaceholderData } = useQuery({
@@ -29,46 +31,52 @@ const CardList = () => {
   }, [data, isPlaceholderData, page, queryClient]);
 
   return (
-    <div className='space-y-4 projects'>
-      {status === "pending" ? (
-        <div>Loading...</div>
-      ) : status === "error" ? (
-        <div className='text-red-500'>Error: {error.message}</div>
-      ) : (
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-          {data.projectList.map((project) => (
-            <ProjectCard key={project.projectId} {...project} />
-          ))}
+    <>
+      {searchTerm === "" ? (
+        <div className='space-y-4 projects'>
+          <div>
+            {status === "pending" ? (
+              <div>Loading...</div>
+            ) : status === "error" ? (
+              <div className='text-red-500'>Error: {error.message}</div>
+            ) : (
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                {data?.projectList.map((project) => (
+                  <ProjectCard key={project.projectId} {...project} />
+                ))}
+              </div>
+            )}
+          </div>
+          <div className='flex pt-10 items-center justify-center'>
+            <div className='flex space-x-4'>
+              <button
+                className='inline-block cursor-pointer rounded-md p-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50'
+                onClick={() => setPage((old) => Math.max(old - 1, 0))}
+                disabled={page === 0}
+              >
+                <IoIosArrowDropleft
+                  className='text-purple-600 hover:text-purple-600 transform hover:scale-110 transition-transform duration-200 ease-in-out'
+                  size={24}
+                />{" "}
+              </button>
+              <span className="pt-2">Page {page + 1}</span>
+              <button
+                className='inline-block cursor-pointer rounded-md p-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50'
+                onClick={() => {
+                  setPage((old) => (data?.hasMore ? old + 1 : old));
+                }}
+                disabled={isPlaceholderData || !data?.hasMore}
+              >
+                <IoIosArrowDropright
+                  className='text-purple-600 hover:text-purple-600 transform hover:scale-110 transition-transform duration-200 ease-in-out'
+                  size={24}
+                />{" "}
+              </button>
+            </div>
+          </div>
         </div>
-      )}
-      <div className='flex pt-10 items-center justify-center'>
-        <div className='flex space-x-4'>
-          <button
-            className='inline-block cursor-pointer rounded-mdp-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50'
-            onClick={() => setPage((old) => Math.max(old - 1, 0))}
-            disabled={page === 0}
-          >
-            <IoIosArrowDropleft
-              className='text-purple-600 hover:text-purple-600 transform hover:scale-110 transition-transform duration-200 ease-in-out'
-              size={24}
-            />{" "}
-          </button>
-          <span>Page {page + 1}</span>
-          <button
-            className='inline-block cursor-pointer rounded-mdp-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50'
-            onClick={() => {
-              setPage((old) => (data?.hasMore ? old + 1 : old));
-            }}
-            disabled={isPlaceholderData || !data?.hasMore}
-          >
-            <IoIosArrowDropright
-              className='text-purple-600 hover:text-purple-600 transform hover:scale-110 transition-transform duration-200 ease-in-out'
-              size={24}
-            />{" "}
-          </button>
-        </div>
-      </div>
-    </div>
+      ) : null}
+    </>
   );
 };
 

@@ -157,6 +157,7 @@ const NewProjectModal: React.FC = () => {
                     placeholder='Enter a tag'
                     className='input input-bordered w-full'
                   />
+                  
                   <button
                     type='button'
                     onClick={handleAddTag}

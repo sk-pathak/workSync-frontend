@@ -30,6 +30,7 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
   const logout = useAuthStore().logout;
   const navigate = useNavigate();
   const { openModal } = useModalStore();
+  const user = useAuthStore((state) => state.user);
 
   return (
     <>
@@ -41,7 +42,8 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
         }`}
       >
         <div className='navbar-start'>
-          <Link to='/' className='btn btn-ghost text-xl'>
+          <Link to='/' className='btn btn-ghost hover:bg-transparent text-xl'>
+            <img src="logo-nobg.svg" alt="logo" width="35" />
             WorkSync
           </Link>
         </div>
@@ -56,7 +58,7 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
                 <div className='w-10 rounded-full'>
                   <img
                     alt='Tailwind CSS Navbar component'
-                    src='https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp'
+                    src={user?.userProfile}
                   />
                 </div>
               </div>
