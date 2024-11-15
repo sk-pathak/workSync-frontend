@@ -1,10 +1,10 @@
 import ProjectCard from "./ProjectCard";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getProjects } from "../services/projectService";
+import { getProjects } from "../../services/projectService";
 import { IoIosArrowDropright, IoIosArrowDropleft } from "react-icons/io";
-import { useProjects } from "../hooks/useProject";
-import { useProjectStore } from "../stores";
+import { useProjects } from "../../hooks/useProjects";
+import { useProjectStore } from "../../stores";
 
 const CardList = () => {
   const queryClient = useQueryClient();
@@ -30,8 +30,8 @@ const CardList = () => {
   if (isError) return <div>Error fetching projects</div>;
 
   return (
-    <div className='space-y-4 projects'>
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+    <div className='space-y-4 projects w-[60%] pl-4'>
+      <div className='grid place-items-center grid-cols-1 sm:grid-cols-2 gap-6'>
         {data?.projectList.map((project) => (
           <ProjectCard key={project.projectId} {...project} />
         ))}
@@ -44,7 +44,7 @@ const CardList = () => {
             disabled={page === 0}
           >
             <IoIosArrowDropleft
-              className='text-purple-600 hover:text-purple-600 transform hover:scale-110 transition-transform duration-200 ease-in-out'
+              className='text-purple-600 hover:text-purple-600 transform hover:scale-125 transition-transform duration-200 ease-in-out'
               size={24}
             />{" "}
           </button>
@@ -57,7 +57,7 @@ const CardList = () => {
             disabled={isPlaceholderData || !data?.hasMore}
           >
             <IoIosArrowDropright
-              className='text-purple-600 hover:text-purple-600 transform hover:scale-110 transition-transform duration-200 ease-in-out'
+              className='text-purple-600 hover:text-purple-600 transform hover:scale-125 transition-transform duration-200 ease-in-out'
               size={24}
             />{" "}
           </button>

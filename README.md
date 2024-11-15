@@ -1,53 +1,118 @@
-# React + TypeScript + Vite
+# Project Page Layout
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 1. Header Section:
+- *Project Title & Tagline:*
+  - *Project Name* prominently displayed with a bold, dynamic font at the top.
+  - *Tagline* or short project description underneath the title (1-2 lines).
+- *Project Status:*
+  - Small colored status indicator (e.g., "Active," "Completed," "Paused") with matching color.
+- *Navigation Menu:*
+  - Horizontal menu with links to different sections like Overview, Team, Tasks, Files, Discussions, Updates.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 2. Hero Section (Above the Fold):
+- *Background Image/Video:*
+  - A custom background image or video showcasing the project theme (e.g., for a design project, use a creative design mockup or work-in-progress footage).
+- *Call to Action (CTA):*
+  - Prominent buttons such as Join Project, Create Task, or Invite Collaborators for quick interaction.
+- *Project Overview:*
+  - A quick summary with important stats: 
+    - Team Size
+    - Current Milestones
+    - Deadline/Timeline
+    - Budget (if applicable)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## 3. Project Overview Section:
+- *About the Project:*
+  - Brief paragraph explaining the purpose of the project, vision, and goals.
+- *Key Objectives:*
+  - A bulleted list or short sections outlining the main goals, what the project hopes to achieve, or the problem it aims to solve.
+- *Timeline:*
+  - Horizontal timeline with color-coded milestones, showing the project phases from start to expected completion date.
+- *Progress Bar:*
+  - A visual progress bar showing percentage completed based on overall project milestones or individual tasks.
 
-- Configure the top-level `parserOptions` property like this:
+---
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## 4. Team Section (Collaboration Focus):
+- *Team Overview:*
+  - Grid layout showing team members with their profile pictures and role (e.g., Designer, Developer, Manager).
+  - Hover over profiles for quick action buttons like Message, View Profile, or View Role in Project.
+- *Invite Team Members:*
+  - A button for inviting new members, which opens a modal with a form for sending invitations via email.
+- *Activity Feed:*
+  - Display recent team activities such as task completions, comments, or updates in a scrollable feed.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+---
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+## 5. Task Management Section:
+- *Active Tasks:*
+  - A Kanban-style board or table that shows tasks in different stages: To Do, In Progress, Completed.
+  - Option to filter by task type, priority, or deadline.
+  - Each task includes a short title, assigned team member, and progress (e.g., 50% complete).
+- *Create Task Button:*
+  - Prominent button to add new tasks.
+- *Task Details Modal:*
+  - Clicking a task opens a detailed modal with description, due date, assigned user, comments, file attachments, and priority level.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+---
+
+## 6. File Sharing Section:
+- *Project Documents:*
+  - A visually organized list/grid of project files (images, documents, spreadsheets, etc.).
+  - Users can upload files with drag-and-drop functionality.
+  - Include filters (e.g., All Files, Images, Docs, Videos).
+- *Version Control:*
+  - If applicable, allow users to view file history with version control (e.g., previous file iterations).
+
+---
+
+## 7. Discussions & Updates Section:
+- *Discussion Forum:*
+  - A live discussion board where users can post questions, comments, and share updates.
+  - Nested threads and comment sections for in-depth collaboration.
+- *Project Updates:*
+  - A feed-style area to display project milestones, announcements, or notable updates.
+  - Could be sorted by Newest, Most Important, or Team Announcements.
+  - Option to "like" or comment on updates.
+  
+---
+
+## 8. Project Analytics (Optional):
+- *Project Health Indicators:*
+  - Display important project metrics such as task completion percentage, budget usage, team engagement, etc., in a visual format (e.g., pie charts, bar graphs).
+- *Risks & Issues:*
+  - A section dedicated to any ongoing challenges or risks, visible to the whole team, with an option to comment and brainstorm solutions.
+
+---
+
+## 9. Footer Section:
+- *Quick Links:*
+  - Links to other parts of the platform like Dashboard, Explore Projects, Notifications, Settings.
+- *Social Sharing:*
+  - Allow users to share the project externally through social media icons (LinkedIn, Twitter, etc.).
+- *Contact Info:*
+  - Project contact details (email, website link) and a simple contact form for inquiries.
+- *Copyright Information:*
+  - Brief footer text with copyright info and terms of service.
+
+---
+
+# Design Considerations:
+- *Color Palette:* A clean and modern palette that aligns with your website’s branding. Use color contrasts for important CTAs, like a bright CTA button for Join Project or Create Task.
+- *Typography:* Use a sans-serif font for headings and a serif or easy-to-read sans-serif font for body text. Make sure headings are bold and sizes vary according to importance.
+- *Whitespace:* Maintain plenty of whitespace between sections for a clutter-free, digestible experience.
+- *Responsive Design:* Ensure the page is mobile-friendly with a collapsible side menu and easily scrollable sections.
+- *Microinteractions:* Add hover effects, button animations, or progress animations (e.g., when a task is completed or a milestone is reached).
+
+# Bonus Features:
+- *Dark Mode Option:* Allow users to toggle between light and dark mode for personalization.
+- *Customizable Alerts:* Enable users to set up custom notifications for project updates, task changes, and team messages.
+-
+
 
 ## Frontend Structure
 

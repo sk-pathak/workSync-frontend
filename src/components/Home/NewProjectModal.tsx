@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useModalStore } from "../stores";
+import { useModalStore } from "../../stores";
 import { toast } from "react-toastify";
-import { createProject } from "../services/projectService";
+import { createProject } from "../../services/projectService";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 

@@ -5,6 +5,7 @@ export type Project = {
   projectImageLink: string;
   tags: string[];
   sourceCodeLink: string;
+  projectStatus: string;
   createdBy: string;
   date: string;
   stars: number;
@@ -19,6 +20,10 @@ export type Res = {
   totalPages: number;
 };
 
-export type ProjectResponse = Res & {
+export type ProjectsResponse = Res & {
   projectList: Project[];
+};
+
+export type ProjectResponse = Res & {
+  project: Project;
 };

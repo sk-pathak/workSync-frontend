@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import LoginModal from "./LoginModal";
-import SignupModal from "./SignupModal";
-import { useAuthStore, useModalStore } from "../stores";
+import LoginModal from "../Common/LoginModal";
+import SignupModal from "../Common/SignupModal";
+import { useAuthStore, useModalStore } from "../../stores";
 import { useNavigate } from "react-router-dom";
 import { TbLogout } from "react-icons/tb";
 import { MdSettingsSuggest } from "react-icons/md";
 
 const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
-
   const [lastScrollY, setLastScrollY] = useState(0);
   const [showNavbar, setShowNavbar] = useState(true);
 
@@ -35,7 +34,7 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
   return (
     <>
       <nav
-        className={`navbar sticky w-full top-0 left-0 z-50 shadow-lg bg-base-300 transition-all duration-300 ease-in-out transform ${
+        className={`navbar sticky w-full top-0 left-0 z-50 shadow-lg bg-base-300 transition-all duration-1000 ease-in-out transform ${
           showNavbar
             ? "translate-y-0 opacity-100 visible"
             : "-translate-y-full opacity-0 invisible"
@@ -43,7 +42,7 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
       >
         <div className='navbar-start'>
           <Link to='/' className='btn btn-ghost hover:bg-transparent text-xl'>
-            <img src="logo-nobg.svg" alt="logo" width="35" />
+            <img src='/logo-nobg.svg' alt='logo' width='35' />
             WorkSync
           </Link>
         </div>
@@ -56,10 +55,7 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
                 className='btn btn-ghost btn-circle avatar'
               >
                 <div className='w-10 rounded-full'>
-                  <img
-                    alt='Tailwind CSS Navbar component'
-                    src={user?.userProfile}
-                  />
+                  <img alt='user profile' src={user?.userProfile} />
                 </div>
               </div>
               <ul
@@ -82,13 +78,13 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
             <div className='flex space-x-4'>
               <button
                 onClick={() => openModal("login")}
-                className='btn border-0 border-b-4 hover:border-purple-600'
+                className='btn bg-transparent hover:text-purple-600 hover:scale-110 hover:font-bold transition-transform duration-300 ease-in-out'
               >
                 Login
               </button>
               <button
                 onClick={() => openModal("signup")}
-                className='btn border-0 border-b-4 hover:border-purple-600'
+                className='btn bg-transparent hover:text-purple-600 hover:scale-110 hover:font-bold transition-transform duration-300 ease-in-out'
               >
                 Register
               </button>

@@ -1,8 +1,9 @@
 import { AxiosError } from "axios";
 import { configApi } from "../api/configApi";
-import { ProjectResponse } from "../types/projectTypes.ts";
+import { ProjectsResponse, ProjectResponse } from "../types/projectTypes.ts";
+import { toast } from "react-toastify";
 
-export const getProjects = async (searchTerm: string = '', sortBy: string = '', order: 'asc' | 'desc' = 'asc', page: number, limit: number = 4): Promise<ProjectResponse> => {
+export const getProjects = async (searchTerm: string = '', sortBy: string = '', order: 'asc' | 'desc' = 'asc', page: number, limit: number = 4): Promise<ProjectsResponse> => {
   try {
     const params = new URLSearchParams();
     if(searchTerm) params.append('searchTerm', searchTerm);
@@ -10,7 +11,7 @@ export const getProjects = async (searchTerm: string = '', sortBy: string = '', 
     if(order) params.append('order', order);
     params.append('page', page.toString());
     params.append('size', limit.toString());
-    const { data } = await configApi.get<ProjectResponse>(`/api/projects/all?${params.toString()}`);
+    const { data } = await configApi.get<ProjectsResponse>(`/api/projects/all?${params.toString()}`);
     return data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -22,9 +23,9 @@ export const getProjects = async (searchTerm: string = '', sortBy: string = '', 
   }
 }
 
-export const createProject = async (formData: FormData): Promise<ProjectResponse> => {
+export const createProject = async (formData: FormData): Promise<ProjectsResponse> => {
   try {
-    const { data } = await configApi.post<ProjectResponse>('/api/projects/create', formData);
+    const { data } = await configApi.post<ProjectsResponse>('/api/projects/create', formData);
     return data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -33,5 +34,34 @@ export const createProject = async (formData: FormData): Promise<ProjectResponse
     }
     console.log(error);
     throw new Error('Could not create project')
+  }
+}
+
+export const getProject = async (id: number): Promise<ProjectResponse> => {
+  try {
+    const { data } = await configApi.get<ProjectResponse>(`/api/projects/all/${id}`);
+    return data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.log(error.response?.data);
+      throw new Error(error.response?.data)
+    }
+    console.log(error);
+    throw new Error('Cannot fetch project')
+  }
+}
+
+export const joinProject = async (id: number): Promise<ProjectResponse> => {
+  try {
+    const { data } = await configApi.put<ProjectResponse>(`/api/projects/adduser/${id}`);
+    return data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.log(error.response?.data);
+      toast.error(error.response?.data.message);
+      throw new Error(error.response?.data)
+    }
+    console.log(error);
+    throw new Error('Could not join project')
   }
 }

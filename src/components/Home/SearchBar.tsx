@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useProjectStore } from "../stores";
+import { useProjectStore } from "../../stores";
 import { debounce } from "lodash";
 
 const SearchBar = () => {

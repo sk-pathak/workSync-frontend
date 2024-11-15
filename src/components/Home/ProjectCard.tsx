@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { CardType } from "../types/cardType";
-import { tagColors } from "../utils/tagColors";
+import { CardType } from "../../types/cardType";
+import { tagColors } from "../../utils/tagColors";
 
 const ProjectCard = ({
   projectId,
@@ -10,11 +10,10 @@ const ProjectCard = ({
   stars,
   tags,
 }: CardType) => {
-  
 
   return (
     <div className='card w-96 bg-base-100 shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl border border-gray-600 rounded-lg overflow-hidden'>
-      <Link to={'/api/projects/all/'+projectId} className='relative'>
+      <Link to={"/projects/" + projectId} className='relative'>
         <img
           src={projectImageLink}
           alt={projectName}
@@ -36,7 +35,9 @@ const ProjectCard = ({
             {tags.map((tag, index) => (
               <span
                 key={index}
-                className={`badge badge-sm badge-outline transition-colors duration-200 ease-in-out text-white ${tagColors[tag] || 'bg-gray-500'}`}
+                className={`badge badge-sm badge-outline transition-colors duration-200 ease-in-out text-white ${
+                  tagColors[tag] || "bg-gray-500"
+                }`}
               >
                 {tag}
               </span>

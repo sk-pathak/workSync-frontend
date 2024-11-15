@@ -103,7 +103,7 @@ const Footer: React.FC = () => {
       {/* Bottom text */}
       <div className='flex items-center pt-4 justify-between text-lg text-base-content'>
         <img src={logo} alt="Logo" className='h-40 w-auto pr-10' />
-        <p>© 2024 WorkSync. All rights reserved.</p>
+        <p>© 2024 workSync. All rights reserved.</p>
       </div>
     </footer>
   );

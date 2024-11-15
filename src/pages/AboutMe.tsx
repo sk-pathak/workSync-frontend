@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Common/Navbar";
 import { useAuthStore } from "../stores";
 
 const AboutMe: React.FC = () => {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore, useModalStore } from "../stores";
+import { useAuthStore, useModalStore } from "../../stores";
 
 const LoginModal: React.FC = () => {
   const [username, setUsername] = useState("");
