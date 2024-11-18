@@ -8,7 +8,12 @@ const ProjectOverview = () => {
   const authStore = useAuthStore();
   const user = authStore.user;
   const { project, fetchStatus, setProject } = useSingleProjectStore();
-  const link = "https://" + project?.sourceCodeLink;
+  let link = project?.sourceCodeLink;
+  if(project?.sourceCodeLink.startsWith("https://")) {
+    link = project?.sourceCodeLink;
+  } else {
+    link = "https://" + project?.sourceCodeLink;
+  }
 
   const [description, setDescription] = useState(project?.projectDescription);
   const [isEditing, setIsEditing] = useState(false);

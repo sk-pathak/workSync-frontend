@@ -12,7 +12,15 @@ export type Project = {
   date: string;
   stars: number;
   users: UserRes[];
+  projectLinks: ProjectLink[];
 };
+
+export type ProjectLink = {
+  linkId: number;
+  linkUrl: string;
+  linkName: string;
+  linkDesc: string;
+}
 
 export type Res = {
   message: string;
