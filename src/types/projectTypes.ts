@@ -1,3 +1,5 @@
+import { UserRes } from "./userTypes";
+
 export type Project = {
   projectId: number;
   projectName: string;
@@ -9,6 +11,7 @@ export type Project = {
   createdBy: string;
   date: string;
   stars: number;
+  users: UserRes[];
 };
 
 export type Res = {

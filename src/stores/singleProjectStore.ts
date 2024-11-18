@@ -2,10 +2,10 @@ import { create } from "zustand";
 import { Project } from "../types/projectTypes";
 
 type SingleProjectStoreState = {
-  fetchStatus: "loading" | "error" | "success";
+  fetchStatus: "loading" | "error" | "success" | "idle";
   project: Project | null;
   setProject: (project: Project | null) => void;
-  setFetchStatus: (projectStatus: "loading" | "error" | "success") => void;
+  setFetchStatus: (projectStatus: "loading" | "error" | "success" | "idle") => void;
 };
 
 export const useSingleProjectStore = create<SingleProjectStoreState>((set) => ({

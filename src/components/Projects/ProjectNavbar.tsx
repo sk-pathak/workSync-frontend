@@ -23,9 +23,15 @@ const ProjectNavbar: React.FC = () => {
         </button>
         <button
           className='btn bg-transparent border-0 text-white hover:text-purple-500'
-          onClick={() => setActiveSection("relevant links")}
+          onClick={() => setActiveSection("tasks")}
         >
-          Relevant Links
+          Tasks
+        </button>
+        <button
+          className='btn bg-transparent border-0 text-white hover:text-purple-500'
+          onClick={() => setActiveSection("activity")}
+        >
+          Activity Logs
         </button>
         <button
           className='btn bg-transparent border-0 text-white hover:text-purple-500'

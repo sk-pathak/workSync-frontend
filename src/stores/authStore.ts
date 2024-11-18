@@ -11,40 +11,37 @@ export type AuthState = {
   user?: UserRes;
   data?: Response;
 
-  login: (email: string, password: string, navigate: Function) => Promise<void>;
-  logout: (navigate: Function) => void;
-  register: (data: FormData, navigate: Function) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  register: (data: FormData) => Promise<void>;
 }
 
 const storeApi: StateCreator<AuthState> = (set) => ({
   status: "unauthorized",
   token: undefined,
   user: undefined,
-  login: async (username: string, password: string, navigate: Function) => {
+  login: async (username: string, password: string) => {
     try {
       const data = await AuthService.login(username, password);
       const token = data.token;
       const user = data.user;
       set({ status: "authorized", token, user });
-      navigate("/");
       
     } catch (error) {
       set({ status: "unauthorized", token: undefined, user: undefined });
       toast.error("Incorrect credentials");
     }
   },
-  logout: (navigate: Function) => {
+  logout: () => {
     set({ status: "unauthorized", token: undefined, user: undefined });
     toast.info("Logged out successfully");
-    navigate("/");
   },
-  register: async (formData: FormData, navigate: Function) => {
+  register: async (formData: FormData) => {
     try {
       const res = await AuthService.register(formData);
       const token = res.token;
       const user = res.user;
       set({ status: "authorized", token, user });
-      navigate("/");
     } catch (error) {
       toast.error("Cannot register user");
     }

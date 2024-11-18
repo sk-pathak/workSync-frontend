@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import LoginModal from "../Common/LoginModal";
 import SignupModal from "../Common/SignupModal";
 import { useAuthStore, useModalStore } from "../../stores";
-import { useNavigate } from "react-router-dom";
 import { TbLogout } from "react-icons/tb";
 import { MdSettingsSuggest } from "react-icons/md";
 
@@ -27,7 +26,6 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
   }, [lastScrollY]);
 
   const logout = useAuthStore().logout;
-  const navigate = useNavigate();
   const { openModal } = useModalStore();
   const user = useAuthStore((state) => state.user);
 
@@ -68,7 +66,7 @@ const Navbar: React.FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
                   </Link>
                 </li>
                 <li>
-                  <button onClick={() => logout(navigate)}>
+                  <button onClick={() => logout()}>
                     Logout <TbLogout className='ml-14' />
                   </button>
                 </li>

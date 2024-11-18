@@ -1,8 +1,8 @@
 import {create} from 'zustand';
 
 type Store = {
-  activeSection: 'overview' | 'team' | 'relevant links' | 'contact';
-  setActiveSection: (section: 'overview' | 'team' | 'relevant links' | 'contact') => void;
+  activeSection: 'overview' | 'team' | 'tasks' | 'contact' | 'activity';
+  setActiveSection: (section: 'overview' | 'team' | 'tasks' | 'contact' | 'activity') => void;
 }
 
 export const useProjectNavStore = create<Store>((set) => ({

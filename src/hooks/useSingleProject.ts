@@ -4,22 +4,28 @@ import { getProject } from "../services/projectService";
 
 export const useSingleProject = (id: number) => {
   const { setProject, setFetchStatus } = useSingleProjectStore();
+
   useEffect(() => {
     if (!id) return;
 
+    setProject(null);
+    setFetchStatus("loading");
+
     const fetchProject = async () => {
-      setFetchStatus("loading");
       try {
         const projectData = await getProject(id);
         setProject(projectData.project);
         setFetchStatus("success");
       } catch (err) {
         setFetchStatus("error");
+        console.error("Error fetching project:", err);
       }
     };
 
     fetchProject();
-  }, [id]);
 
-  return;
-}
+    return () => {
+      setFetchStatus("idle");
+    };
+  }, [id, setProject, setFetchStatus]);
+};

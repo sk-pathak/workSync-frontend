@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import { configApi } from "../api/configApi";
-import { ProjectsResponse, ProjectResponse } from "../types/projectTypes.ts";
+import { ProjectsResponse, ProjectResponse, Project } from "../types/projectTypes.ts";
 import { toast } from "react-toastify";
 
 export const getProjects = async (searchTerm: string = '', sortBy: string = '', order: 'asc' | 'desc' = 'asc', page: number, limit: number = 4): Promise<ProjectsResponse> => {
@@ -63,5 +63,19 @@ export const joinProject = async (id: number): Promise<ProjectResponse> => {
     }
     console.log(error);
     throw new Error('Could not join project')
+  }
+}
+
+export const updateProject = async (id: number, project: Project): Promise<ProjectResponse> => {
+  try {
+    const { data } = await configApi.put<ProjectResponse>(`/api/projects/update/${id}`, project);
+    return data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.log(error.response?.data);
+      throw new Error(error.response?.data)
+    }
+    console.log(error);
+    throw new Error('Could not update project')
   }
 }

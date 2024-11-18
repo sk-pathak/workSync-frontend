@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useAuthStore, useModalStore } from "../../stores";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -14,7 +13,6 @@ const SignupModal: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState("");
 
   const signup = useAuthStore().register;
-  const navigate = useNavigate();
 
   const { modals, openModal, closeModal } = useModalStore();
 
@@ -60,7 +58,7 @@ const SignupModal: React.FC = () => {
       formData.append("image", selectedImage as Blob);
     }
 
-    await signup(formData, navigate);
+    await signup(formData);
 
     setName("");
     setEmail("");
@@ -68,7 +66,6 @@ const SignupModal: React.FC = () => {
     setPassword("");
 
     closeModal("signup");
-    navigate("/");
   };
 
   return (
