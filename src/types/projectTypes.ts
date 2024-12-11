@@ -12,6 +12,7 @@ export type Project = {
   date: string;
   stars: number;
   users: UserRes[];
+  starredBy: UserRes[];
   projectLinks: ProjectLink[];
 };
 

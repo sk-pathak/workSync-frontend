@@ -137,10 +137,12 @@ const ProjectOverview = () => {
           <FaUsers className='text-xl text-gray-300' />
           <p className='text-gray-400'>Team Size: {project?.users.length}</p>
         </div>
+        {/* git tree or git history/ trophy */}
       </div>
 
       <div className='w-3/5 flex items-center justify-center bg-base-100 rounded-lg shadow-md p-6'>
         <p className='text-2xl font-semibold text-gray-400'>Analytics</p>
+        {/* histogram- commits/month, heatmap, awards */}
       </div>
     </div>
   );

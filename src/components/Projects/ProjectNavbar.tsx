@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useProjectNavStore } from "../../stores";
 
 const ProjectNavbar: React.FC = () => {
@@ -6,35 +6,43 @@ const ProjectNavbar: React.FC = () => {
     (state) => state.setActiveSection
   );
 
+  const activeSection = useProjectNavStore((state) => state.activeSection);
+
+  useEffect(() => {
+    if (!activeSection) {
+      setActiveSection("overview");
+    }
+  }, [activeSection, setActiveSection]);
+
   return (
     <div className='navbar bg-base-300 text-primary-content p-4 h-10'>
       <div className='flex space-x-12'>
         <button
-          className='btn bg-transparent border-0 text-white hover:text-purple-500'
+          className={`${activeSection=="overview"?"text-purple-500":"text-white"} btn bg-transparent border-0 hover:text-purple-500`}
           onClick={() => setActiveSection("overview")}
         >
           Overview
         </button>
         <button
-          className='btn bg-transparent border-0 text-white hover:text-purple-500'
+          className={`${activeSection=="team"?"text-purple-500":"text-white"} btn bg-transparent border-0 hover:text-purple-500`}
           onClick={() => setActiveSection("team")}
         >
           Team
         </button>
         <button
-          className='btn bg-transparent border-0 text-white hover:text-purple-500'
+          className={`${activeSection=="tasks"?"text-purple-500":"text-white"} btn bg-transparent border-0 hover:text-purple-500`}
           onClick={() => setActiveSection("tasks")}
         >
           Tasks
         </button>
         <button
-          className='btn bg-transparent border-0 text-white hover:text-purple-500'
+          className={`${activeSection=="activity"?"text-purple-500":"text-white"} btn bg-transparent border-0 hover:text-purple-500`}
           onClick={() => setActiveSection("activity")}
         >
           Activity Logs
         </button>
         <button
-          className='btn bg-transparent border-0 text-white hover:text-purple-500'
+          className={`${activeSection=="contact"?"text-purple-500":"text-white"} btn bg-transparent border-0 hover:text-purple-500`}
           onClick={() => setActiveSection("contact")}
         >
           Contact

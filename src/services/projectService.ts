@@ -79,3 +79,17 @@ export const updateProject = async (id: number, project: Project): Promise<Proje
     throw new Error('Could not update project')
   }
 }
+
+export const starProject = async (id: number): Promise<ProjectResponse> => {
+  try {
+    const { data } = await configApi.put<ProjectResponse>(`/api/projects/star/${id}`);
+    return data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.log(error.response?.data);
+      throw new Error(error.response?.data)
+    }
+    console.log(error);
+    throw new Error('Could not star project')
+  }
+}

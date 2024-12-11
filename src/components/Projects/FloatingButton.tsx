@@ -7,7 +7,7 @@ const FloatingButton = () => {
   const authStore = useAuthStore();
   const user = authStore.user;
   const isLoggedIn = authStore.status === "authorized";
-  const [position, setPosition] = useState("sticky top-[32rem] right-8");
+  const [isFixed, setIsFixed] = useState(false);
 
   const { project } = useSingleProjectStore();
 
@@ -31,10 +31,10 @@ const FloatingButton = () => {
   };
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 450) {
-        setPosition("fixed bottom-8 right-8");
+      if (window.scrollY > 530) {
+        setIsFixed(true);
       } else {
-        setPosition("sticky top-[32rem] right-8");
+        setIsFixed(false);
       }
     };
     window.addEventListener("scroll", handleScroll);
@@ -43,10 +43,16 @@ const FloatingButton = () => {
 
   return (
     <div
-      className={`transition-all duration-500 ${position} sm:w-auto flex justify-center z-10 items-center`}
+      className={`transition-all duration-500 transform ${
+        isFixed
+          ? "fixed bottom-8 right-8 translate-y-0 opacity-100"
+          : "sticky top-[32rem] translate-y-4 opacity-75"
+      } sm:w-auto flex justify-center z-10 items-center`}
     >
       <button
-        className={`bg-purple-600 text-white font-semibold py-3 px-6 rounded-full flex items-center justify-center gap-2 shadow-lg transition duration-300 hover:bg-purple-700 ${isJoined ? 'bg-opacity-60 cursor-not-allowed disabled' : ''}`}
+        className={`bg-purple-600 text-white font-semibold py-3 px-6 rounded-full flex items-center justify-center gap-2 shadow-lg transition duration-300 hover:bg-purple-700 ${
+          isJoined ? "bg-opacity-60 cursor-not-allowed disabled" : ""
+        }`}
         onClick={handleClick}
       >
         {!isJoined ? (
