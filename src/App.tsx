@@ -40,6 +40,7 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <Router>
+            <div className="space-bg" />
             <Routes>
               <Route 
                 path="/login" 

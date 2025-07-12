@@ -1,60 +1,90 @@
 @import "tailwindcss";
 
-:root {
+html, body {
+  min-height: 100vh;
+  background: #0a0616;
+  color: #e1e1e1;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #181825;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  position: relative;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
   min-height: 100vh;
+  background: #0a0616;
+  position: relative;
+  overflow-x: hidden;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.space-bg {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url('/bg.jpg');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  opacity: 0.95;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.glass-card {
+  background: rgba(30, 19, 47, 0.60);
+  border: 1.5px solid rgba(180, 120, 255, 0.32);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 2px 32px 0 rgba(180, 120, 255, 0.13);
+  border-radius: 1.5rem;
 }
 
+.glass-button {
+  background: linear-gradient(135deg, rgba(180,120,255,0.22) 0%, rgba(162,89,255,0.18) 100%);
+  border: 1.5px solid #b478ff;
+  color: #fff;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0.75rem;
+  transition: all 0.15s ease-out;
+  box-shadow: 0 2px 12px 0 rgba(180,120,255,0.10);
+}
+.glass-button:hover, .glass-button:focus {
+  background: linear-gradient(135deg, #d4b4ff 0%, #a259ff 100%);
+  border-color: #d4b4ff;
+  color: #fff;
+  box-shadow: 0 4px 24px 0 #b478ff66, 0 0 16px 0 #b478ff33;
+  transform: translateY(-1px);
+}
 
+.header-brand-text {
+  text-shadow: 0 2px 8px #b478ff99, 0 1px 0 #fff;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0616;
+}
+::-webkit-scrollbar-thumb {
+  background: #24183a;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7f5af0;
+}
+
+::selection {
+  background: rgba(127, 90, 240, 0.3);
+  color: #e1e1e1;
+}
+*:focus-visible {
+  outline: 2px solid #7f5af0;
+  outline-offset: 2px;
+}
 
 @layer base {
   :root {
@@ -77,47 +107,67 @@ button:focus-visible {
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 26 14% 11%;
+    --foreground: 0 0% 88%;
+    --card: 26 14% 18%;
+    --card-foreground: 0 0% 88%;
+    --popover: 26 14% 18%;
+    --popover-foreground: 0 0% 88%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 88%;
+    --secondary: 26 14% 22%;
+    --secondary-foreground: 0 0% 88%;
+    --muted: 26 14% 22%;
+    --muted-foreground: 0 0% 66%;
+    --accent: 26 14% 22%;
+    --accent-foreground: 0 0% 88%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 88%;
+    --border: 26 14% 22%;
+    --input: 26 14% 18%;
+    --ring: 262 83% 58%;
+    --radius: 0.5rem;
   }
 }
 
 [data-radix-popper-content-wrapper], .fixed, .z-50, .z-[9999], .radix-dialog-content {
   z-index: 9999 !important;
 }
+
 .radix-dialog-content {
-  background: #232136 !important;
-  color: #f8f8ff !important;
+  background: rgba(30, 19, 47, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  color: #e1e1e1 !important;
   border-radius: 1.25rem;
-  box-shadow: 0 4px 24px 0 rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-fade-in,
+  .animate-pop,
+  .animate-slide-in,
+  .animate-slide-up,
+  .animate-count-up {
+    animation: none !important;
+  }
+  
+  .glass-card,
+  .glass-button {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }

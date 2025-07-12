@@ -7,28 +7,15 @@ import {
   Settings,
   Bell,
   Shield,
-  Palette,
-  Globe,
   Key,
   Trash2,
   Save,
-  Moon,
-  Sun,
-  Monitor,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +27,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTheme } from 'next-themes';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -70,7 +56,6 @@ export const SettingsPage = () => {
     showProjects: true,
   });
 
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const { logout } = useAuthStore();
 
@@ -114,17 +99,19 @@ export const SettingsPage = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6 bg-gradient-dark min-h-screen">
+    <div className="p-6 max-w-5xl mx-auto space-y-8 bg-background min-h-screen">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center space-x-3"
+        className="flex items-center space-x-4"
       >
-        <Settings className="w-8 h-8 text-primary drop-shadow" />
+        <div className="p-3 rounded-xl bg-gradient-primary">
+          <Settings className="w-8 h-8 text-white" />
+        </div>
         <div>
-          <h1 className="text-3xl font-bold text-primary drop-shadow">Settings</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold text-text-primary">Settings</h1>
+          <p className="text-text-secondary text-lg">
             Manage your account settings and preferences
           </p>
         </div>
@@ -136,94 +123,55 @@ export const SettingsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="privacy">Privacy</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="account">Account</TabsTrigger>
+        <Tabs defaultValue="notifications" className="space-y-8">
+          <TabsList className="flex justify-center bg-transparent p-0">
+            <TabsTrigger
+              value="notifications"
+              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
+            >
+              <Bell className="w-4 h-4 mr-2" />
+              <span className="group-data-[state=active]:text-accent">Notifications</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="privacy"
+              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              <span className="group-data-[state=active]:text-accent">Privacy</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="security"
+              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
+            >
+              <Key className="w-4 h-4 mr-2" />
+              <span className="group-data-[state=active]:text-accent">Security</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="account"
+              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              <span className="group-data-[state=active]:text-accent">Account</span>
+            </TabsTrigger>
           </TabsList>
 
-          {/* General Settings */}
-          <TabsContent value="general">
-            <Card className="neu-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Palette className="w-5 h-5 mr-2" />
-                  Appearance
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Theme</Label>
-                  <Select value={theme} onValueChange={setTheme}>
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">
-                        <div className="flex items-center">
-                          <Sun className="w-4 h-4 mr-2" />
-                          Light
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="dark">
-                        <div className="flex items-center">
-                          <Moon className="w-4 h-4 mr-2" />
-                          Dark
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="system">
-                        <div className="flex items-center">
-                          <Monitor className="w-4 h-4 mr-2" />
-                          System
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <Label>Language</Label>
-                  <Select defaultValue="en">
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">
-                        <div className="flex items-center">
-                          <Globe className="w-4 h-4 mr-2" />
-                          English
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="es">Spanish</SelectItem>
-                      <SelectItem value="fr">French</SelectItem>
-                      <SelectItem value="de">German</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           {/* Notification Settings */}
-          <TabsContent value="notifications">
-            <Card className="neu-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Bell className="w-5 h-5 mr-2" />
+          <TabsContent value="notifications" className="space-y-6">
+            <Card className="glass-card">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center text-xl text-text-primary">
+                  <div className="p-2 rounded-lg bg-accent/20 mr-3">
+                    <Bell className="w-5 h-5 text-accent" />
+                  </div>
                   Notification Preferences
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Email Notifications</Label>
-                      <p className="text-sm text-muted-foreground">
+              <CardContent className="space-y-8">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+                    <div className="space-y-1">
+                      <Label className="text-text-primary font-medium">Email Notifications</Label>
+                      <p className="text-text-secondary text-sm">
                         Receive notifications via email
                       </p>
                     </div>
@@ -232,13 +180,14 @@ export const SettingsPage = () => {
                       onCheckedChange={(checked) =>
                         setNotifications(prev => ({ ...prev, email: checked }))
                       }
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Push Notifications</Label>
-                      <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+                    <div className="space-y-1">
+                      <Label className="text-text-primary font-medium">Push Notifications</Label>
+                      <p className="text-text-secondary text-sm">
                         Receive push notifications in your browser
                       </p>
                     </div>
@@ -247,15 +196,14 @@ export const SettingsPage = () => {
                       onCheckedChange={(checked) =>
                         setNotifications(prev => ({ ...prev, push: checked }))
                       }
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
                     />
                   </div>
 
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Project Updates</Label>
-                      <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+                    <div className="space-y-1">
+                      <Label className="text-text-primary font-medium">Project Updates</Label>
+                      <p className="text-text-secondary text-sm">
                         Get notified when projects you're involved in are updated
                       </p>
                     </div>
@@ -264,13 +212,14 @@ export const SettingsPage = () => {
                       onCheckedChange={(checked) =>
                         setNotifications(prev => ({ ...prev, projectUpdates: checked }))
                       }
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Task Assignments</Label>
-                      <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+                    <div className="space-y-1">
+                      <Label className="text-text-primary font-medium">Task Assignments</Label>
+                      <p className="text-text-secondary text-sm">
                         Get notified when tasks are assigned to you
                       </p>
                     </div>
@@ -279,13 +228,14 @@ export const SettingsPage = () => {
                       onCheckedChange={(checked) =>
                         setNotifications(prev => ({ ...prev, taskAssignments: checked }))
                       }
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Join Requests</Label>
-                      <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+                    <div className="space-y-1">
+                      <Label className="text-text-primary font-medium">Join Requests</Label>
+                      <p className="text-text-secondary text-sm">
                         Get notified when someone requests to join your projects
                       </p>
                     </div>
@@ -294,11 +244,12 @@ export const SettingsPage = () => {
                       onCheckedChange={(checked) =>
                         setNotifications(prev => ({ ...prev, joinRequests: checked }))
                       }
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
                     />
                   </div>
                 </div>
 
-                <Button onClick={saveNotificationSettings}>
+                <Button onClick={saveNotificationSettings} className="glass-button hover:bg-accent/30">
                   <Save className="w-4 h-4 mr-2" />
                   Save Preferences
                 </Button>
@@ -307,20 +258,22 @@ export const SettingsPage = () => {
           </TabsContent>
 
           {/* Privacy Settings */}
-          <TabsContent value="privacy">
-            <Card className="neu-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="w-5 h-5 mr-2" />
+          <TabsContent value="privacy" className="space-y-6">
+            <Card className="glass-card">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center text-xl text-text-primary">
+                  <div className="p-2 rounded-lg bg-accent/20 mr-3">
+                    <Shield className="w-5 h-5 text-accent" />
+                  </div>
                   Privacy Settings
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Profile Visibility</Label>
-                      <p className="text-sm text-muted-foreground">
+              <CardContent className="space-y-8">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+                    <div className="space-y-1">
+                      <Label className="text-text-primary font-medium">Profile Visibility</Label>
+                      <p className="text-text-secondary text-sm">
                         Make your profile visible to other users
                       </p>
                     </div>
@@ -329,13 +282,14 @@ export const SettingsPage = () => {
                       onCheckedChange={(checked) =>
                         setPrivacy(prev => ({ ...prev, profileVisible: checked }))
                       }
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Show Email</Label>
-                      <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+                    <div className="space-y-1">
+                      <Label className="text-text-primary font-medium">Show Email</Label>
+                      <p className="text-text-secondary text-sm">
                         Display your email address on your profile
                       </p>
                     </div>
@@ -344,13 +298,14 @@ export const SettingsPage = () => {
                       onCheckedChange={(checked) =>
                         setPrivacy(prev => ({ ...prev, showEmail: checked }))
                       }
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Show Projects</Label>
-                      <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+                    <div className="space-y-1">
+                      <Label className="text-text-primary font-medium">Show Projects</Label>
+                      <p className="text-text-secondary text-sm">
                         Display your projects on your profile
                       </p>
                     </div>
@@ -359,11 +314,12 @@ export const SettingsPage = () => {
                       onCheckedChange={(checked) =>
                         setPrivacy(prev => ({ ...prev, showProjects: checked }))
                       }
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
                     />
                   </div>
                 </div>
 
-                <Button onClick={savePrivacySettings}>
+                <Button onClick={savePrivacySettings} className="glass-button hover:bg-accent/30">
                   <Save className="w-4 h-4 mr-2" />
                   Save Settings
                 </Button>
@@ -372,62 +328,67 @@ export const SettingsPage = () => {
           </TabsContent>
 
           {/* Security Settings */}
-          <TabsContent value="security">
-            <Card className="neu-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Key className="w-5 h-5 mr-2" />
+          <TabsContent value="security" className="space-y-6">
+            <Card className="glass-card">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center text-xl text-text-primary">
+                  <div className="p-2 rounded-lg bg-accent/20 mr-3">
+                    <Key className="w-5 h-5 text-accent" />
+                  </div>
                   Security
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit(onPasswordSubmit)} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
+                <form onSubmit={handleSubmit(onPasswordSubmit)} className="space-y-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="currentPassword" className="text-text-primary font-medium">Current Password</Label>
                     <Input
                       id="currentPassword"
                       type="password"
                       {...register('currentPassword')}
-                      className={errors.currentPassword ? 'border-destructive' : ''}
+                      className={`w-full bg-surface/50 border border-border text-text-primary placeholder:text-text-secondary focus:border-accent focus:ring-1 focus:ring-accent/20 rounded-lg px-4 py-3 transition-all duration-200 ${errors.currentPassword ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
+                      placeholder="Enter your current password"
                     />
                     {errors.currentPassword && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-error mt-1">
                         {errors.currentPassword.message}
                       </p>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="newPassword" className="text-text-primary font-medium">New Password</Label>
                     <Input
                       id="newPassword"
                       type="password"
                       {...register('newPassword')}
-                      className={errors.newPassword ? 'border-destructive' : ''}
+                      className={`w-full bg-surface/50 border border-border text-text-primary placeholder:text-text-secondary focus:border-accent focus:ring-1 focus:ring-accent/20 rounded-lg px-4 py-3 transition-all duration-200 ${errors.newPassword ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
+                      placeholder="Enter your new password"
                     />
                     {errors.newPassword && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-error mt-1">
                         {errors.newPassword.message}
                       </p>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="confirmPassword" className="text-text-primary font-medium">Confirm New Password</Label>
                     <Input
                       id="confirmPassword"
                       type="password"
                       {...register('confirmPassword')}
-                      className={errors.confirmPassword ? 'border-destructive' : ''}
+                      className={`w-full bg-surface/50 border border-border text-text-primary placeholder:text-text-secondary focus:border-accent focus:ring-1 focus:ring-accent/20 rounded-lg px-4 py-3 transition-all duration-200 ${errors.confirmPassword ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
+                      placeholder="Confirm your new password"
                     />
                     {errors.confirmPassword && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-error mt-1">
                         {errors.confirmPassword.message}
                       </p>
                     )}
                   </div>
 
-                  <Button type="submit">
+                  <Button type="submit" className="glass-button hover:bg-accent/30 w-full">
                     <Save className="w-4 h-4 mr-2" />
                     Change Password
                   </Button>
@@ -437,17 +398,17 @@ export const SettingsPage = () => {
           </TabsContent>
 
           {/* Account Settings */}
-          <TabsContent value="account">
-            <Card className="neu-card">
-              <CardHeader>
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          <TabsContent value="account" className="space-y-6">
+            <Card className="glass-card border-error/30">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-xl text-error">Danger Zone</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="border border-destructive/20 rounded-lg p-4">
+                <div className="border border-error/30 rounded-xl p-6 bg-error/5">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Delete Account</h4>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-text-primary">Delete Account</h4>
+                      <p className="text-text-secondary text-sm max-w-md">
                         Permanently delete your account and all associated data.
                         This action cannot be undone.
                       </p>
@@ -455,6 +416,7 @@ export const SettingsPage = () => {
                     <Button
                       variant="destructive"
                       onClick={() => setShowDeleteDialog(true)}
+                      className="bg-error hover:bg-error/90 text-white"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete Account
@@ -469,19 +431,19 @@ export const SettingsPage = () => {
 
       {/* Delete Account Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="glass-card border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Account</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-text-primary">Delete Account</AlertDialogTitle>
+            <AlertDialogDescription className="text-text-secondary">
               Are you sure you want to delete your account? This action cannot be undone.
               All your projects, tasks, and data will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="glass-button border-border">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAccount}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-error text-white hover:bg-error/90"
             >
               Delete Account
             </AlertDialogAction>

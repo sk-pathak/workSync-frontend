@@ -12,7 +12,6 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'neu-card',
       className
     )}
     {...props}
@@ -27,7 +26,6 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'neu-btn',
       className
     )}
     {...props}

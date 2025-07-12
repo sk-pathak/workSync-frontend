@@ -80,9 +80,18 @@ export const ProjectCreatePage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-dark p-4">
-      <Card className="w-full max-w-lg neu-card">
+      <Card className="w-full max-w-lg glass-card">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-primary drop-shadow">Create New Project</CardTitle>
+          <div className="flex items-center mb-2">
+            <Button asChild variant="ghost" size="icon" className="glass-button mr-2" tabIndex={-1}>
+              <a href="/projects" aria-label="Back to Projects">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </a>
+            </Button>
+            <CardTitle className="text-2xl font-bold text-primary drop-shadow">Create New Project</CardTitle>
+          </div>
         </CardHeader>
         <Separator />
         <CardContent>

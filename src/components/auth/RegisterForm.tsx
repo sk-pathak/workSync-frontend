@@ -59,21 +59,9 @@ export const RegisterForm = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Create an account
-          </CardTitle>
-          <CardDescription className="text-center">
-            Enter your information to get started
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      <Card className="neu-card">
+        <CardContent className="p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
@@ -157,6 +145,6 @@ export const RegisterForm = () => {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

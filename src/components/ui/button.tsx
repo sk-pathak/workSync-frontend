@@ -5,20 +5,20 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover-neu',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default:
-          'neu-btn',
+          'glass-button',
         destructive:
-          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 hover-neu',
+          'glass-button bg-red-500/20 border-red-400 text-red-100 hover:bg-red-400/30 hover:border-red-300',
         outline:
-          'border border-input bg-card shadow-sm hover:bg-accent hover:text-accent-foreground hover-neu',
+          'glass-button bg-transparent border-accent/50 text-accent hover:bg-accent/20 hover:border-accent',
         secondary:
-          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 hover-neu',
-        ghost: 'hover:bg-accent hover:text-accent-foreground hover-neu',
-        link: 'text-primary underline-offset-4 hover:underline hover-neu',
+          'glass-button bg-secondary/20 border-secondary/50 text-secondary-foreground hover:bg-secondary/30 hover:border-secondary',
+        ghost: 'glass-button bg-transparent border-transparent hover:bg-accent/20 hover:border-accent/50',
+        link: 'text-primary underline-offset-4 hover:underline bg-transparent border-transparent',
       },
       size: {
         default: 'h-9 px-4 py-2',

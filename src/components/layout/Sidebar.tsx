@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
   FolderOpen,
@@ -8,48 +7,64 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  User,
+  BarChart3,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useToast } from '@/hooks/use-toast';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Projects', href: '/projects', icon: FolderOpen },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Profile', href: '/profile', icon: User },
 ];
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { unreadCount } = useNotificationStore();
+  const { logout } = useAuthStore();
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: 'Logged out',
+      description: 'You have been successfully logged out.',
+    });
+    navigate('/login');
+  };
 
   return (
-    <motion.div
-      initial={{ width: collapsed ? 80 : 256 }}
-      animate={{ width: collapsed ? 80 : 256 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="flex flex-col h-full bg-gradient-dark neu-card border border-border shadow-neu transition-all duration-300"
+    <div 
+      className={`flex flex-col h-[calc(100vh-2rem-3.5rem)] my-4 glass-card border border-white/10 shadow-glass transition-all duration-200 ${
+        collapsed ? 'w-20' : 'w-70'
+      }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-center justify-between p-6 border-b border-white/10">
         {!collapsed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex items-center space-x-2"
-          >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-button">
-              <FolderOpen className="w-5 h-5 text-primary-foreground" />
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glass">
+              <FolderOpen className="w-6 h-6 text-white" />
             </div>
-            <span className="font-bold text-lg tracking-wide">WorkSync</span>
-          </motion.div>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg tracking-wide text-text-primary">WorkSync</span>
+              <span className="text-xs text-text-secondary">Project Management</span>
+            </div>
+          </div>
         )}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-full hover-neu"
+          className="p-2 rounded-xl glass-button hover:scale-105 transition-transform"
         >
           {collapsed ? (
             <ChevronRight className="w-4 h-4" />
@@ -65,93 +80,138 @@ export function Sidebar() {
           const isActive = location.pathname === item.href;
           return (
             <Link key={item.name} to={item.href}>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <div
                 className={cn(
-                  'flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors hover-neu',
+                  'flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-150 relative group hover:scale-102 active:scale-98',
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow-button'
-                    : 'hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-gradient-primary text-white shadow-glass'
+                    : 'hover:bg-accent/10 hover:text-accent text-text-secondary'
                 )}
               >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {/* Active indicator */}
+                {isActive && (
+                  <div
+                    className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
+                  />
+                )}
+                
+                <item.icon className={cn(
+                  "w-5 h-5 flex-shrink-0",
+                  isActive ? "text-white" : "text-text-secondary group-hover:text-accent"
+                )} />
+                
                 {!collapsed && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="font-medium"
+                  <span
+                    className={cn(
+                      "font-medium",
+                      isActive ? "text-white" : "text-text-secondary group-hover:text-accent"
+                    )}
                   >
                     {item.name}
-                  </motion.span>
+                  </span>
                 )}
-              </motion.div>
+              </div>
             </Link>
           );
         })}
 
+        {/* Divider */}
+        <div className="my-4 border-t border-white/10" />
+
         {/* Notifications */}
         <Link to="/notifications">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <div
             className={cn(
-              'flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors relative hover-neu',
+              'flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-150 relative group hover:scale-102 active:scale-98',
               location.pathname === '/notifications'
-                ? 'bg-primary text-primary-foreground shadow-button'
-                : 'hover:bg-accent hover:text-accent-foreground'
+                ? 'bg-gradient-primary text-white shadow-glass'
+                : 'hover:bg-accent/10 hover:text-accent text-text-secondary'
             )}
           >
-            <Bell className="w-5 h-5 flex-shrink-0" />
+            {/* Active indicator */}
+            {location.pathname === '/notifications' && (
+              <div
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
+              />
+            )}
+            
+            <Bell className={cn(
+              "w-5 h-5 flex-shrink-0",
+              location.pathname === '/notifications' ? "text-white" : "text-text-secondary group-hover:text-accent"
+            )} />
+            
             {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="font-medium"
+              <span
+                className={cn(
+                  "font-medium",
+                  location.pathname === '/notifications' ? "text-white" : "text-text-secondary group-hover:text-accent"
+                )}
               >
                 Notifications
-              </motion.span>
+              </span>
             )}
+            
             {unreadCount > 0 && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-button"
+              <div
+                className="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-glass"
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
-              </motion.div>
+              </div>
             )}
-          </motion.div>
+          </div>
         </Link>
 
         {/* Settings */}
         <Link to="/settings">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <div
             className={cn(
-              'flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors hover-neu',
+              'flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-150 relative group hover:scale-102 active:scale-98',
               location.pathname === '/settings'
-                ? 'bg-primary text-primary-foreground shadow-button'
-                : 'hover:bg-accent hover:text-accent-foreground'
+                ? 'bg-gradient-primary text-white shadow-glass'
+                : 'hover:bg-accent/10 hover:text-accent text-text-secondary'
             )}
           >
-            <Settings className="w-5 h-5 flex-shrink-0" />
+            {/* Active indicator */}
+            {location.pathname === '/settings' && (
+              <div
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
+              />
+            )}
+            
+            <Settings className={cn(
+              "w-5 h-5 flex-shrink-0",
+              location.pathname === '/settings' ? "text-white" : "text-text-secondary group-hover:text-accent"
+            )} />
+            
             {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="font-medium"
+              <span
+                className={cn(
+                  "font-medium",
+                  location.pathname === '/settings' ? "text-white" : "text-text-secondary group-hover:text-accent"
+                )}
               >
                 Settings
-              </motion.span>
+              </span>
             )}
-          </motion.div>
+          </div>
         </Link>
       </nav>
-    </motion.div>
+
+      {/* Logout Button */}
+      <div className="p-4 border-t border-white/10">
+        <Button
+          onClick={handleLogout}
+          variant="ghost"
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-150 hover:bg-red-500/10 hover:text-red-400 text-text-secondary group hover:scale-102 active:scale-98"
+        >
+          <LogOut className="w-5 h-5 flex-shrink-0 text-text-secondary group-hover:text-red-400" />
+          {!collapsed && (
+            <span className="font-medium text-text-secondary group-hover:text-red-400">
+              Logout
+            </span>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -113,13 +113,8 @@ export const ProjectCard = ({
   });
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Card className="h-full hover:shadow-lg transition-shadow">
+    <div className="animate-fade-in">
+      <Card className="h-full hover:shadow-lg transition-all duration-150 hover:scale-102">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -275,6 +270,6 @@ export const ProjectCard = ({
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

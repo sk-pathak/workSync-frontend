@@ -1,18 +1,29 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Plus,
   Settings,
   Star,
   Edit,
-  Loader2
+  Loader2,
+  MessageSquare,
+  Users,
+  BarChart3,
+  CheckSquare,
+  Share2,
+  Eye,
+  EyeOff,
+  Calendar,
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { projectsApi, tasksApi } from '@/lib/api';
 import {
   Dialog,
@@ -48,17 +59,17 @@ const AnalyticsPanel = lazy(() => import('@/components/projects/AnalyticsPanel')
 const ComponentLoadingFallback = () => {
   return (
     <div className="flex items-center justify-center p-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
     </div>
   );
 }
 
 const statusColors = {
-  PLANNED: 'bg-blue-500/10 text-blue-700 border-blue-200',
-  ACTIVE: 'bg-green-500/10 text-green-700 border-green-200',
-  COMPLETED: 'bg-purple-500/10 text-purple-700 border-purple-200',
-  ON_HOLD: 'bg-yellow-500/10 text-yellow-700 border-yellow-200',
-  CANCELLED: 'bg-red-500/10 text-red-700 border-red-200',
+  PLANNED: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+  ACTIVE: 'bg-green-500/20 text-green-400 border-green-500/30',
+  COMPLETED: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  ON_HOLD: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  CANCELLED: 'bg-red-500/20 text-red-400 border-red-500/30',
 };
 
 export const ProjectDetailPage = () => {
@@ -162,7 +173,6 @@ export const ProjectDetailPage = () => {
 
   const starMutation = useMutation({
     mutationFn: (starred: boolean) => {
-      
       return starred ? projectsApi.unstar(id!) : projectsApi.star(id!);
     },
     onMutate: async (starred) => {
@@ -283,10 +293,19 @@ export const ProjectDetailPage = () => {
     );
   };
 
+  const getProgress = () => {
+    if (project?.tasks && Array.isArray(project.tasks)) {
+      const completedTasks = project.tasks.filter((t: any) => t.status === 'DONE').length;
+      const totalTasks = project.tasks.length;
+      return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    }
+    return project?.progress || 0;
+  };
+
   if (projectLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="animate-spin w-8 h-8" />
+        <Loader2 className="animate-spin w-8 h-8 text-accent" />
       </div>
     );
   }
@@ -295,8 +314,8 @@ export const ProjectDetailPage = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Project not found</h2>
-          <Link to="/projects" className="text-primary hover:underline">
+          <h2 className="text-2xl font-bold mb-4 text-text-primary">Project not found</h2>
+          <Link to="/projects" className="text-accent hover:underline">
             Back to projects
           </Link>
         </div>
@@ -310,151 +329,308 @@ export const ProjectDetailPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button asChild variant="outline" size="sm">
-            <Link to="/projects">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{project.name}</h1>
-            <p className="text-muted-foreground">{project.description}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card p-6 rounded-2xl"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button asChild variant="ghost" size="sm" className="glass-button">
+              <Link to="/projects">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Link>
+            </Button>
+            <div>
+              <div className="flex items-center space-x-3">
+                <h1 className="text-3xl font-bold text-text-primary">{project.name}</h1>
+                <Badge className={statusColors[project.status]}>
+                  {project.status.replace('_', ' ')}
+                </Badge>
+              </div>
+              <p className="text-text-secondary mt-1">{project.description}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          {membership && !membership.isMember && membership.canJoin && (
-            <Button onClick={() => joinMutation.mutate()} disabled={joinMutation.isPending}>
-              {joinMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Join Project'}
-            </Button>
-          )}
-          {membership && membership.isMember && membership.canLeave && !isOwner && (
-            <Button variant="outline" onClick={() => leaveMutation.mutate()} disabled={leaveMutation.isPending}>
-              {leaveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Leave Project'}
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleStarProject}
-            disabled={starMutation.isPending}
-          >
-            <Star className={cn('w-4 h-4', starredStatus ? 'fill-yellow-400 text-yellow-400' : '')} />
-          </Button>
-          {canEdit && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleStatusChange}
+          <div className="flex items-center space-x-2">
+            {membership && !membership.isMember && membership.canJoin && (
+              <Button 
+                onClick={() => joinMutation.mutate()} 
+                disabled={joinMutation.isPending}
+                className="glass-button"
               >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSettingsOpen(true)}
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Project Info */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <h3 className="font-semibold">Status</h3>
-          </CardHeader>
-          <CardContent>
-            <Badge className={statusColors[project.status]}>
-              {project.status.replace('_', ' ')}
-            </Badge>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <h3 className="font-semibold">Created</h3>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <h3 className="font-semibold">Visibility</h3>
-          </CardHeader>
-          <CardContent>
-            <Badge variant="outline">
-              {project.isPublic ? 'Public' : 'Private'}
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs */}
-      <Tabs defaultValue="tasks" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="chat">Chat</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="tasks" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Tasks</h2>
-            {canEdit && (
-              <Button onClick={() => setCreateTaskOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Task
+                {joinMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Join Project'}
               </Button>
             )}
+            {membership && membership.isMember && membership.canLeave && !isOwner && (
+              <Button 
+                variant="ghost" 
+                onClick={() => leaveMutation.mutate()} 
+                disabled={leaveMutation.isPending}
+                className="glass-button"
+              >
+                {leaveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Leave Project'}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleStarProject}
+              disabled={starMutation.isPending}
+              className="glass-button"
+            >
+              <Star className={cn('w-4 h-4', starredStatus ? 'fill-yellow-400 text-yellow-400' : '')} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="glass-button"
+            >
+              <Share2 className="w-4 h-4" />
+            </Button>
+            {canEdit && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleStatusChange}
+                  className="glass-button"
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSettingsOpen(true)}
+                  className="glass-button"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </>
+            )}
           </div>
-          <Suspense fallback={<ComponentLoadingFallback />}>
-            <TaskBoard
-              tasks={tasks}
-              onEditTask={handleEditTask}
-              onDeleteTask={handleDeleteTask}
-              canEdit={canEdit}
-              members={projectMembers}
-              onAssignTask={handleAssignTask}
-              onStatusChange={handleTaskStatusChange}
-            />
-          </Suspense>
-        </TabsContent>
+        </div>
+      </motion.div>
 
-        <TabsContent value="chat" className="space-y-4">
-          <h2 className="text-2xl font-bold">Team Chat</h2>
-          <Suspense fallback={<ComponentLoadingFallback />}>
-            <ChatBox chatId={project?.chatId} projectId={id!} members={members} />
-          </Suspense>
-        </TabsContent>
+      {/* Project Overview */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-4 gap-6"
+      >
+        <Card className="glass-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center space-x-2">
+              <Target className="w-4 h-4 text-accent" />
+              <CardTitle className="text-sm text-text-primary">Progress</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold text-accent">{getProgress()}%</span>
+              </div>
+              <Progress value={getProgress()} className="h-2 bg-surface-hover" />
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="members" className="space-y-4">
-          <h2 className="text-2xl font-bold">Team Members</h2>
-          <Suspense fallback={<ComponentLoadingFallback />}>
-            <ProjectMembersCard
-              projectId={id!}
-              members={projectMembers}
-              isOwner={isOwner}
-              projectOwner={project?.owner}
-            />
-          </Suspense>
-        </TabsContent>
+        <Card className="glass-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center space-x-2">
+              <Users className="w-4 h-4 text-accent" />
+              <CardTitle className="text-sm text-text-primary">Members</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl font-bold text-text-primary">{members.length}</span>
+              <span className="text-text-secondary text-sm">team members</span>
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="analytics" className="space-y-4">
-          <h2 className="text-2xl font-bold">Analytics</h2>
-          <Suspense fallback={<ComponentLoadingFallback />}>
-            <AnalyticsPanel projectId={id!} />
-          </Suspense>
-        </TabsContent>
-      </Tabs>
+        <Card className="glass-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center space-x-2">
+              <CheckSquare className="w-4 h-4 text-accent" />
+              <CardTitle className="text-sm text-text-primary">Tasks</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl font-bold text-text-primary">{tasks.length}</span>
+              <span className="text-text-secondary text-sm">total tasks</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4 text-accent" />
+              <CardTitle className="text-sm text-text-primary">Created</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-text-secondary">
+                {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Tabbed Navigation */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Tabs defaultValue="tasks" className="space-y-6">
+          <TabsList className="glass-card p-1 h-auto">
+            <TabsTrigger value="tasks" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
+              <CheckSquare className="w-4 h-4" />
+              <span>Tasks</span>
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
+              <MessageSquare className="w-4 h-4" />
+              <span>Chat</span>
+            </TabsTrigger>
+            <TabsTrigger value="members" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
+              <Users className="w-4 h-4" />
+              <span>Team</span>
+            </TabsTrigger>
+            <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
+              <Target className="w-4 h-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
+              <BarChart3 className="w-4 h-4" />
+              <span>Analytics</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="tasks" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-text-primary">Tasks</h2>
+              {canEdit && (
+                <Button onClick={() => setCreateTaskOpen(true)} className="glass-button">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Task
+                </Button>
+              )}
+            </div>
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <TaskBoard
+                tasks={tasks}
+                onEditTask={handleEditTask}
+                onDeleteTask={handleDeleteTask}
+                canEdit={canEdit}
+                members={projectMembers}
+                onAssignTask={handleAssignTask}
+                onStatusChange={handleTaskStatusChange}
+              />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="chat" className="space-y-4">
+            <h2 className="text-2xl font-bold text-text-primary">Team Chat</h2>
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <ChatBox chatId={project?.chatId} projectId={id!} members={members} />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="members" className="space-y-4">
+            <h2 className="text-2xl font-bold text-text-primary">Team Members</h2>
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <ProjectMembersCard
+                projectId={id!}
+                members={projectMembers}
+                isOwner={isOwner}
+                projectOwner={project?.owner}
+              />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="overview" className="space-y-4">
+            <h2 className="text-2xl font-bold text-text-primary">Project Overview</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-text-primary">Project Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Status</span>
+                    <Badge className={statusColors[project.status]}>
+                      {project.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Visibility</span>
+                    <div className="flex items-center space-x-1">
+                      {project.isPublic ? (
+                        <Eye className="w-4 h-4 text-text-secondary" />
+                      ) : (
+                        <EyeOff className="w-4 h-4 text-text-secondary" />
+                      )}
+                      <span className="text-text-primary">{project.isPublic ? 'Public' : 'Private'}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Created</span>
+                    <span className="text-text-primary">
+                      {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Last Updated</span>
+                    <span className="text-text-primary">
+                      {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-text-primary">Quick Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Total Tasks</span>
+                    <span className="text-text-primary font-semibold">{tasks.length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Completed Tasks</span>
+                    <span className="text-text-primary font-semibold">
+                      {tasks.filter((t: Task) => t.status === 'DONE').length}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Team Members</span>
+                    <span className="text-text-primary font-semibold">{members.length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-secondary">Progress</span>
+                    <span className="text-accent font-semibold">{getProgress()}%</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <h2 className="text-2xl font-bold text-text-primary">Analytics</h2>
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <AnalyticsPanel projectId={id!} />
+            </Suspense>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
 
       {/* Dialogs */}
       <Suspense fallback={null}>
@@ -491,19 +667,19 @@ export const ProjectDetailPage = () => {
 
       {/* Status Change Dialog */}
       <Dialog open={statusChangeOpen} onOpenChange={setStatusChangeOpen}>
-        <DialogContent>
+        <DialogContent className="glass-card">
           <DialogHeader>
-            <DialogTitle>Change Project Status</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-text-primary">Change Project Status</DialogTitle>
+            <DialogDescription className="text-text-secondary">
               Select the new status for this project.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Select value={newStatus} onValueChange={(value: ProjectStatus) => setNewStatus(value)}>
-              <SelectTrigger>
+              <SelectTrigger className="neu-input border-white/10">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass-card">
                 <SelectItem value="PLANNED">Planned</SelectItem>
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="COMPLETED">Completed</SelectItem>
@@ -513,10 +689,10 @@ export const ProjectDetailPage = () => {
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStatusChangeOpen(false)}>
+            <Button variant="outline" onClick={() => setStatusChangeOpen(false)} className="glass-button">
               Cancel
             </Button>
-            <Button onClick={handleUpdateStatus} disabled={updateStatusMutation.isPending}>
+            <Button onClick={handleUpdateStatus} disabled={updateStatusMutation.isPending} className="glass-button">
               {updateStatusMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Status'}
             </Button>
           </DialogFooter>
@@ -524,4 +700,4 @@ export const ProjectDetailPage = () => {
       </Dialog>
     </div>
   );
-}
+};
