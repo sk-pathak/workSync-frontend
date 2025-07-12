@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+body {
+  @apply text-white min-h-screen antialiased transition-colors duration-300;
+  background: linear-gradient(135deg, #181825 0%, #232336 100%);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #232336;
+}
+::-webkit-scrollbar-thumb {
+  background: #312e81;
+  border-radius: 8px;
+}
+
+.neu-card {
+  @apply rounded-lg transition-shadow duration-200;
+  box-shadow: 8px 8px 24px #1a1a2e, -8px -8px 24px #2d2d44;
+}
+
+.neu-btn {
+  @apply text-white rounded-lg transition-all duration-200;
+  background: linear-gradient(135deg, #a259ff 0%, #6c2bd7 100%);
+  box-shadow: 0 2px 8px 0 rgba(124, 58, 237, 0.15);
+}
+
+.neu-input {
+  @apply text-white rounded-md border focus:outline-none transition-all duration-200;
+  background: linear-gradient(135deg, #232136 0%, #2d2d44 100%);
+  box-shadow: inset 2px 2px 8px #1a1a2e, inset -2px -2px 8px #2d2d44;
+  border-color: #28283a;
+
+  --tw-ring-color: #a259ff;
+}
+
+.gradient-header {
+  @apply text-white rounded-b-lg;
+  background: linear-gradient(135deg, #7c3aed 0%, #38bdf8 100%);
+  box-shadow: 0 4px 24px 0 rgba(124, 58, 237, 0.12);
+}
+
+.hover-neu:hover {
+  box-shadow: 0 8px 32px 0 rgba(124, 58, 237, 0.18);
+  transform: translateY(-2px) scale(1.01);
+}
