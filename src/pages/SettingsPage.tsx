@@ -68,7 +68,7 @@ export const SettingsPage = () => {
     resolver: zodResolver(passwordSchema),
   });
 
-  const onPasswordSubmit = (data: PasswordFormData) => {
+  const onPasswordSubmit = () => {
     toast({
       title: 'Password updated',
       description: 'Your password has been successfully changed.',

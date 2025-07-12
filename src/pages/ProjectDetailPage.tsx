@@ -84,17 +84,13 @@ export const ProjectDetailPage = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [membership, setMembership] = useState<{ isMember: boolean; isOwner: boolean; canJoin: boolean; canLeave: boolean } | null>(null);
-  const [loadingMembership, setLoadingMembership] = useState(false);
 
   const fetchMembership = async () => {
-    setLoadingMembership(true);
     try {
       const data = await projectsApi.getMembership(id!);
       setMembership(data);
     } catch (e) {
       setMembership(null);
-    } finally {
-      setLoadingMembership(false);
     }
   };
 
@@ -181,7 +177,7 @@ export const ProjectDetailPage = () => {
       queryClient.setQueryData(['project-starred', id], !starred);
       return { previousStarredStatus };
     },
-    onError: (err, starred, context) => {
+    onError: (err, _starred, context) => {
       if (context?.previousStarredStatus !== undefined) {
         queryClient.setQueryData(['project-starred', id], context.previousStarredStatus);
       }

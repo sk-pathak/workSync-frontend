@@ -107,7 +107,7 @@ export const useUpdateProject = () => {
       
       cacheUtils.invalidateProject(id);
     },
-    onError: (error, { id }) => {
+    onError: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['project', id] });
     },
   });

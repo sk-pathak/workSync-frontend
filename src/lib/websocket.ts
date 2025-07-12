@@ -30,8 +30,8 @@ class WebSocketService {
     
     this.client = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => {
-    
+      debug: () => {
+        // No-op
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,

@@ -1,4 +1,4 @@
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
@@ -11,7 +11,12 @@ import {
   Users,
   Calendar,
   Eye,
-  EyeOff
+  EyeOff,
+  FolderOpen,
+  TrendingUp,
+  CheckCircle,
+  Settings,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +46,7 @@ export const ProjectsPage = () => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
@@ -90,7 +96,7 @@ export const ProjectsPage = () => {
       
       return { previousProjects, previousStarredProjects };
     },
-    onError: (err, { projectId }, context) => {
+    onError: (err, _, context) => {
       if (context?.previousProjects) {
         queryClient.setQueryData(['projects'], context.previousProjects);
       }
@@ -139,15 +145,27 @@ export const ProjectsPage = () => {
     setEditingProject(project);
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    searchInputRef.current?.focus();
+  };
+
   const visibleProjects = projects.filter((project: Project) => {
     if (project.isPublic) return true;
     return user && user.id === project.ownerId;
   });
 
-  const filteredProjects = visibleProjects.filter((project: Project) =>
-    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (project.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
-  );
+  const filteredProjects = visibleProjects.filter((project: Project) => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    
+    return (
+      project.name.toLowerCase().includes(query) ||
+      project.description?.toLowerCase().includes(query) ||
+      false
+    );
+  });
 
   const getStatusColor = (status: ProjectStatus) => {
     switch (status) {
@@ -169,48 +187,120 @@ export const ProjectsPage = () => {
     return project.progress || 0;
   };
 
+  const stats = {
+    total: filteredProjects.length,
+    active: filteredProjects.filter(p => p.status === 'ACTIVE').length,
+    completed: filteredProjects.filter(p => p.status === 'COMPLETED').length,
+    starred: starredProjects.length,
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-8 bg-gradient-dark min-h-screen">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-6 rounded-2xl"
+        className="flex items-center justify-between"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="p-3 rounded-xl bg-gradient-primary">
+            <FolderOpen className="w-8 h-8 text-white" />
+          </div>
           <div>
-            <h1 className="text-3xl font-bold text-text-primary">Projects</h1>
-            <p className="text-text-secondary">
+            <h1 className="text-4xl font-bold text-text-primary">Projects</h1>
+            <p className="text-text-secondary text-lg">
               Manage and collaborate on your projects
             </p>
           </div>
-          <Button asChild className="glass-button">
-            <Link to="/projects/new">
-              <Plus className="mr-2 h-4 w-4" />
-              New Project
-            </Link>
-          </Button>
         </div>
+        <Button asChild className="glass-button">
+          <Link to="/projects/new">
+            <Plus className="mr-2 h-4 w-4" />
+            New Project
+          </Link>
+        </Button>
       </motion.div>
 
-      {/* Sticky Filter & Sort Bar */}
+      {/* Stats Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="sticky top-0 z-10 glass-card p-4 rounded-2xl"
+        className="grid grid-cols-2 md:grid-cols-4 gap-4"
+      >
+        <Card className="glass-card hover:scale-105 transition-transform duration-200">
+          <CardContent className="p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <FolderOpen className="w-5 h-5 text-accent mr-2" />
+              <div className="text-2xl font-bold text-text-primary">{stats.total}</div>
+            </div>
+            <p className="text-sm text-text-secondary">Total Projects</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card hover:scale-105 transition-transform duration-200">
+          <CardContent className="p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <TrendingUp className="w-5 h-5 text-green-400 mr-2" />
+              <div className="text-2xl font-bold text-text-primary">{stats.active}</div>
+            </div>
+            <p className="text-sm text-text-secondary">Active</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card hover:scale-105 transition-transform duration-200">
+          <CardContent className="p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Star className="w-5 h-5 text-yellow-400 mr-2" />
+              <div className="text-2xl font-bold text-text-primary">{stats.starred}</div>
+            </div>
+            <p className="text-sm text-text-secondary">Starred</p>
+          </CardContent>
+        </Card>
+        <Card className="glass-card hover:scale-105 transition-transform duration-200">
+          <CardContent className="p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <CheckCircle className="w-5 h-5 text-blue-400 mr-2" />
+              <div className="text-2xl font-bold text-text-primary">{stats.completed}</div>
+            </div>
+            <p className="text-sm text-text-secondary">Completed</p>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Filter & Sort Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="glass-card p-6 rounded-2xl"
       >
         <div className="flex flex-col lg:flex-row gap-4 items-center">
-          {/* Search */}
           <div className="flex-1 w-full lg:w-auto">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
+            <div className="relative group w-full max-w-xs">
+              {/* Search Input */}
               <Input
-                placeholder="Search projects by name or description..."
+                ref={searchInputRef}
+                placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 neu-input border-white/10 focus:border-accent/50"
+                className="pl-12 pr-10 neu-input border-white/10 focus:border-accent/50 transition-all duration-300 group-hover:border-accent/30 relative z-10 text-left bg-transparent"
+                style={{ textAlign: 'left' }}
               />
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-50">
+                <Search className="w-5 h-5 text-white" stroke="white" />
+              </span>
+              {/* Clear Button */}
+              {searchQuery && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={handleClearSearch}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-surface-hover transition-colors z-20"
+                  type="button"
+                >
+                  <X className="w-4 h-4 text-text-secondary hover:text-text-primary" />
+                </motion.button>
+              )}
             </div>
           </div>
 
@@ -252,60 +342,67 @@ export const ProjectsPage = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 pt-4 border-t border-white/10"
+            className="mt-6 pt-6 border-t border-white/10"
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Select
-                value={filters.status || 'all'}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? undefined : value as ProjectStatus }))}
-              >
-                <SelectTrigger className="neu-input border-white/10">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent className="glass-card">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="PLANNED">Planned</SelectItem>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="COMPLETED">Completed</SelectItem>
-                  <SelectItem value="ON_HOLD">On Hold</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filters.owned ? 'owned' : filters.member ? 'member' : 'all'}
-                onValueChange={(value) => {
-                  if (value === 'owned') {
-                    setFilters(prev => ({ ...prev, owned: true, member: undefined }));
-                  } else if (value === 'member') {
-                    setFilters(prev => ({ ...prev, member: true, owned: undefined }));
-                  } else {
-                    setFilters(prev => ({ ...prev, owned: undefined, member: undefined }));
-                  }
-                }}
-              >
-                <SelectTrigger className="neu-input border-white/10">
-                  <SelectValue placeholder="All Projects" />
-                </SelectTrigger>
-                <SelectContent className="glass-card">
-                  <SelectItem value="all">All Projects</SelectItem>
-                  <SelectItem value="owned">My Projects</SelectItem>
-                  <SelectItem value="member">Member Of</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filters.starred ? 'starred' : 'all'}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, starred: value === 'starred' }))}
-              >
-                <SelectTrigger className="neu-input border-white/10">
-                  <SelectValue placeholder="All Projects" />
-                </SelectTrigger>
-                <SelectContent className="glass-card">
-                  <SelectItem value="all">All Projects</SelectItem>
-                  <SelectItem value="starred">Starred Only</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex justify-center">
+              <div className="w-full max-w-md bg-surface-hover/90 rounded-2xl border border-white/10 shadow-xl p-8 flex flex-col md:flex-row md:items-center md:gap-8 gap-6 my-8">
+                {/* Status Filter */}
+                <div className="flex-1 flex flex-col items-center md:items-start">
+                  <label className="text-sm font-medium text-text-secondary mb-2">Status</label>
+                  <div className="w-full flex items-center justify-center">
+                    <Select
+                      value={filters.status || 'all'}
+                      onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? undefined : value as ProjectStatus }))}
+                    >
+                      <SelectTrigger className="w-full h-11 rounded-lg border border-white/10 bg-surface-hover/90 shadow focus:border-accent/60 focus:ring-2 focus:ring-accent/30 transition-all text-base">
+                        <SelectValue placeholder="All Status" />
+                      </SelectTrigger>
+                      <SelectContent className="glass-card rounded-lg shadow-lg">
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="PLANNED">Planned</SelectItem>
+                        <SelectItem value="ACTIVE">Active</SelectItem>
+                        <SelectItem value="COMPLETED">Completed</SelectItem>
+                        <SelectItem value="ON_HOLD">On Hold</SelectItem>
+                        <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {/* Divider for desktop only, hidden on mobile */}
+                <div className="hidden md:flex items-center justify-center mx-4 self-stretch">
+                  <div className="h-full w-px bg-white/10 rounded-full" />
+                </div>
+                {/* Ownership/Starred Filter */}
+                <div className="flex-1 flex flex-col items-center md:items-start">
+                  <label className="text-sm font-medium text-text-secondary mb-2">Project Type</label>
+                  <div className="w-full flex items-center justify-center">
+                    <Select
+                      value={filters.owned ? 'owned' : filters.member ? 'member' : filters.starred ? 'starred' : 'all'}
+                      onValueChange={(value) => {
+                        if (value === 'owned') {
+                          setFilters(prev => ({ ...prev, owned: true, member: undefined, starred: undefined }));
+                        } else if (value === 'member') {
+                          setFilters(prev => ({ ...prev, member: true, owned: undefined, starred: undefined }));
+                        } else if (value === 'starred') {
+                          setFilters(prev => ({ ...prev, starred: true, owned: undefined, member: undefined }));
+                        } else {
+                          setFilters(prev => ({ ...prev, owned: undefined, member: undefined, starred: undefined }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full h-11 rounded-lg border border-white/10 bg-surface-hover/90 shadow focus:border-accent/60 focus:ring-2 focus:ring-accent/30 transition-all text-base">
+                        <SelectValue placeholder="All Projects" />
+                      </SelectTrigger>
+                      <SelectContent className="glass-card rounded-lg shadow-lg">
+                        <SelectItem value="all">All Projects</SelectItem>
+                        <SelectItem value="owned">My Projects</SelectItem>
+                        <SelectItem value="member">Member Of</SelectItem>
+                        <SelectItem value="starred">Starred Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -334,10 +431,11 @@ export const ProjectsPage = () => {
         <>
           {filteredProjects.length === 0 ? (
             <Card className="glass-card">
-              <CardContent className="flex flex-col items-center justify-center py-12">
+              <CardContent className="flex flex-col items-center justify-center py-16">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold mb-2 text-text-primary">No projects found</h3>
-                  <p className="text-text-secondary mb-4">
+                  <FolderOpen className="w-16 h-16 text-text-secondary mx-auto mb-4 opacity-50" />
+                  <h3 className="text-xl font-semibold mb-2 text-text-primary">No projects found</h3>
+                  <p className="text-text-secondary mb-6">
                     {searchQuery || Object.keys(filters).length > 0
                       ? 'Try adjusting your search or filters.'
                       : 'Get started by creating your first project.'}
@@ -357,24 +455,25 @@ export const ProjectsPage = () => {
                 : 'grid-cols-1'
             }`}>
               {filteredProjects.map((project, index) => (
-                <div
+                <motion.div
                   key={project.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.05}s` }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
                 >
-                  <Card className="glass-card h-full hover:scale-102 transition-transform duration-150 group">
-                    <CardHeader className="pb-3">
+                  <Card className="glass-card h-full hover:scale-105 transition-transform duration-200 group">
+                    <CardHeader className="pb-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
                           <Link
                             to={`/projects/${project.id}`}
                             className="block"
                           >
-                            <CardTitle className="text-text-primary group-hover:text-accent transition-colors line-clamp-1">
+                            <CardTitle className="text-lg text-text-primary group-hover:text-accent transition-colors line-clamp-1">
                               {project.name}
                             </CardTitle>
                           </Link>
-                          <p className="text-text-secondary text-sm line-clamp-2 mt-1">
+                          <p className="text-text-secondary text-sm line-clamp-2 mt-2">
                             {project.description || 'No description'}
                           </p>
                         </div>
@@ -382,7 +481,7 @@ export const ProjectsPage = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleStar(project.id)}
-                          className="p-1 h-auto"
+                          className="p-2 h-auto glass-button hover:scale-110 transition-transform"
                         >
                           <Star 
                             className={`w-4 h-4 ${
@@ -441,7 +540,7 @@ export const ProjectsPage = () => {
                       </div>
 
                       {/* Quick Actions */}
-                      <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                      <div className="flex items-center justify-between pt-3 border-t border-white/10">
                         <div className="flex items-center space-x-2">
                           <Avatar className="w-6 h-6">
                             <AvatarImage src={project.owner?.avatarUrl} />
@@ -450,7 +549,7 @@ export const ProjectsPage = () => {
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-xs text-text-secondary">
-                            {project.owner?.name}
+                            {project.owner?.name || project.owner?.username}
                           </span>
                         </div>
                         
@@ -472,6 +571,7 @@ export const ProjectsPage = () => {
                               onClick={() => handleEdit(project)}
                               className="text-xs glass-button"
                             >
+                              <Settings className="w-3 h-3 mr-1" />
                               Edit
                             </Button>
                           )}
@@ -479,7 +579,7 @@ export const ProjectsPage = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}

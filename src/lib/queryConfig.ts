@@ -172,16 +172,12 @@ export const cacheUtils = {
 };
 
 export const performanceUtils = {
-  trackQueryPerformance: (queryKey: any[], duration: number) => {
-    if (process.env.NODE_ENV === 'development') {
-      
-    }
+  trackQueryPerformance: () => {
+    // No-op for now
   },
   
-  trackMutationPerformance: (mutationKey: string, duration: number) => {
-    if (process.env.NODE_ENV === 'development') {
-      
-    }
+  trackMutationPerformance: () => {
+    // No-op for now
   },
   
   getCacheStats: () => {
