@@ -1,15 +1,36 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import path from 'path';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'vite';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
-  }
-})
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  optimizeDeps: {
+    include: ['lucide-react'],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'query-vendor': ['@tanstack/react-query'],
+          'chart-vendor': ['recharts'],
+          'animation-vendor': ['framer-motion'],
+          'websocket-vendor': ['@stomp/stompjs', 'sockjs-client'],
+          'utils-vendor': ['date-fns', 'clsx', 'class-variance-authority', 'tailwind-merge'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
+});
