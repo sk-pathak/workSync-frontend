@@ -12,6 +12,11 @@ import {
   X,
   Camera,
   Loader2,
+  User,
+  FolderOpen,
+  Users,
+  CheckCircle,
+  TrendingUp,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -119,29 +124,32 @@ export const ProfilePage = () => {
   const stats = {
     ownedProjects: userProjects.content.length,
     memberProjects: memberProjects.content.length,
-    totalProjects: userProjects.content.length + memberProjects.content.length,
+    myProjects: userProjects.content.length + memberProjects.content.length,
     completedProjects: [...userProjects.content, ...memberProjects.content].filter(
       p => p.status === 'COMPLETED'
     ).length,
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6 bg-gradient-dark min-h-screen">
+    <div className="p-6 max-w-6xl mx-auto space-y-8 bg-gradient-dark min-h-screen">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex items-center space-x-4"
       >
+        <div className="p-3 rounded-xl bg-gradient-primary">
+          <User className="w-8 h-8 text-white" />
+        </div>
         <div>
-          <h1 className="text-3xl font-bold text-primary drop-shadow">Profile</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold text-text-primary">Profile</h1>
+          <p className="text-text-secondary text-lg">
             Manage your account settings and preferences
           </p>
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -149,61 +157,74 @@ export const ProfilePage = () => {
           transition={{ delay: 0.1 }}
           className="lg:col-span-1"
         >
-          <Card className="neu-card">
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
+          <Card className="glass-card">
+            <CardHeader className="pb-6">
+              <CardTitle className="flex items-center text-xl text-text-primary">
+                <div className="p-2 rounded-lg bg-accent/20 mr-3">
+                  <User className="w-5 h-5 text-accent" />
+                </div>
+                Profile Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Avatar */}
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
-                  <Avatar className="w-24 h-24">
+                  <Avatar className="w-28 h-28 border-4 border-accent/20">
                     <AvatarImage src={user?.avatarUrl} />
-                    <AvatarFallback className="text-2xl">
+                    <AvatarFallback className="text-3xl bg-gradient-primary text-white">
                       {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
+                    className="absolute -bottom-2 -right-2 rounded-full w-10 h-10 p-0 glass-button hover:scale-110 transition-transform"
                   >
                     <Camera className="w-4 h-4" />
                   </Button>
                 </div>
                 <div className="text-center">
-                  <h3 className="font-semibold text-lg">
+                  <h3 className="font-bold text-xl text-text-primary">
                     {user?.name || user?.username}
                   </h3>
-                  <p className="text-sm text-muted-foreground">@{user?.username}</p>
-                  <Badge variant="secondary" className="mt-2">
-                    {user?.role}
+                  <p className="text-text-secondary text-sm">@{user?.username}</p>
+                  <Badge className="mt-3 bg-accent/20 text-accent border-accent/30">
+                    {user?.role || 'User'}
                   </Badge>
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-white/10" />
 
               {/* Basic Info */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2 text-sm">
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span>{user?.email}</span>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-surface/30 border border-white/10">
+                  <Mail className="w-4 h-4 text-accent" />
+                  <div>
+                    <p className="text-xs text-text-secondary">Email</p>
+                    <p className="text-sm text-text-primary">{user?.email}</p>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2 text-sm">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span>
-                    Joined {user?.createdAt ? formatDistanceToNow(new Date(user.createdAt)) : ''} ago
-                  </span>
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-surface/30 border border-white/10">
+                  <Calendar className="w-4 h-4 text-accent" />
+                  <div>
+                    <p className="text-xs text-text-secondary">Member since</p>
+                    <p className="text-sm text-text-primary">
+                      {user?.createdAt ? formatDistanceToNow(new Date(user.createdAt)) : 'Unknown'} ago
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {user?.bio && (
                 <>
-                  <Separator />
+                  <Separator className="bg-white/10" />
                   <div>
-                    <h4 className="font-medium mb-2">Bio</h4>
-                    <p className="text-sm text-muted-foreground">{user.bio}</p>
+                    <h4 className="font-medium mb-2 text-text-primary">Bio</h4>
+                    <p className="text-sm text-text-secondary bg-surface/30 p-3 rounded-lg border border-white/10">
+                      {user.bio}
+                    </p>
                   </div>
                 </>
               )}
@@ -216,49 +237,66 @@ export const ProfilePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="lg:col-span-2 space-y-6"
+          className="lg:col-span-2 space-y-8"
         >
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="neu-card">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold">{stats.totalProjects}</div>
-                <p className="text-sm text-muted-foreground">Total Projects</p>
+            <Card className="glass-card hover:scale-105 transition-transform duration-200">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <FolderOpen className="w-6 h-6 text-accent mr-2" />
+                  <div className="text-3xl font-bold text-text-primary">{stats.myProjects}</div>
+                </div>
+                <p className="text-sm text-text-secondary">My Projects</p>
               </CardContent>
             </Card>
-            <Card className="neu-card">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold">{stats.ownedProjects}</div>
-                <p className="text-sm text-muted-foreground">Owned</p>
+            <Card className="glass-card hover:scale-105 transition-transform duration-200">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <User className="w-6 h-6 text-green-400 mr-2" />
+                  <div className="text-3xl font-bold text-text-primary">{stats.ownedProjects}</div>
+                </div>
+                <p className="text-sm text-text-secondary">Owned</p>
               </CardContent>
             </Card>
-            <Card className="neu-card">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold">{stats.memberProjects}</div>
-                <p className="text-sm text-muted-foreground">Member</p>
+            <Card className="glass-card hover:scale-105 transition-transform duration-200">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="w-6 h-6 text-blue-400 mr-2" />
+                  <div className="text-3xl font-bold text-text-primary">{stats.memberProjects}</div>
+                </div>
+                <p className="text-sm text-text-secondary">Member</p>
               </CardContent>
             </Card>
-            <Card className="neu-card">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold">{stats.completedProjects}</div>
-                <p className="text-sm text-muted-foreground">Completed</p>
+            <Card className="glass-card hover:scale-105 transition-transform duration-200">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                  <div className="text-3xl font-bold text-text-primary">{stats.completedProjects}</div>
+                </div>
+                <p className="text-sm text-text-secondary">Completed</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Edit Profile */}
-          <Card className="neu-card">
-            <CardHeader>
+          <Card className="glass-card">
+            <CardHeader className="pb-6">
               <div className="flex items-center justify-between">
-                <CardTitle>Edit Profile</CardTitle>
+                <CardTitle className="flex items-center text-xl text-text-primary">
+                  <div className="p-2 rounded-lg bg-accent/20 mr-3">
+                    <Edit className="w-5 h-5 text-accent" />
+                  </div>
+                  Edit Profile
+                </CardTitle>
                 {!isEditing ? (
-                  <Button onClick={() => setIsEditing(true)} size="sm">
+                  <Button onClick={() => setIsEditing(true)} className="glass-button">
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
                 ) : (
                   <div className="flex space-x-2">
-                    <Button onClick={handleCancel} size="sm" variant="outline">
+                    <Button onClick={handleCancel} className="glass-button bg-transparent border-border">
                       <X className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>
@@ -267,53 +305,53 @@ export const ProfilePage = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="name" className="text-text-primary font-medium">Full Name</Label>
                   <Input
                     id="name"
                     placeholder="Enter your full name"
                     {...register('name')}
                     disabled={!isEditing}
-                    className={errors.name ? 'border-destructive' : ''}
+                    className={`w-full neu-input ${errors.name ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
                   />
                   {errors.name && (
-                    <p className="text-sm text-destructive">{errors.name.message}</p>
+                    <p className="text-sm text-error mt-1">{errors.name.message}</p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="email" className="text-text-primary font-medium">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="Enter your email"
                     {...register('email')}
                     disabled={!isEditing}
-                    className={errors.email ? 'border-destructive' : ''}
+                    className={`w-full neu-input ${errors.email ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
                   />
                   {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email.message}</p>
+                    <p className="text-sm text-error mt-1">{errors.email.message}</p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="bio" className="text-text-primary font-medium">Bio</Label>
                   <Textarea
                     id="bio"
                     placeholder="Tell us about yourself"
                     {...register('bio')}
                     disabled={!isEditing}
                     rows={4}
-                    className={errors.bio ? 'border-destructive' : ''}
+                    className={`w-full neu-input ${errors.bio ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
                   />
                   {errors.bio && (
-                    <p className="text-sm text-destructive">{errors.bio.message}</p>
+                    <p className="text-sm text-error mt-1">{errors.bio.message}</p>
                   )}
                 </div>
 
                 {isEditing && (
-                  <Button type="submit" disabled={isLoading}>
+                  <Button type="submit" disabled={isLoading} className="glass-button w-full">
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Save className="w-4 h-4 mr-2" />
                     Save Changes

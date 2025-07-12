@@ -1,17 +1,20 @@
-## Backend first
-- joining project should need approval from owner
+## Backend
+- return message & logout when token expired
+- notification dismiss not working
+- no info about notif
 - fix notifications
+- settings
+- joining project should need approval from owner
 - avatar pics??
 - rate limiting?
-- settings
-- return message & logout when token expired
 
-## Frontend first
+## Frontend
 - design overhaul
-- github url
-- landing page
-- projects visible to everyone
-- socials
-- md box for requirements?
+- projects page (if owner -> You, progress, members, style search box and filter better)
+- join/leave
+- main context box scrolling for no reason
 - task status
-- main context box scrolling for now reason
+- github url
+- projects visible to everyone
+- landing page
+- md box for requirements?
