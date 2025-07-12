@@ -11,6 +11,9 @@ import { queryClient } from '@/lib/queryConfig';
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(module => ({ default: module.LoginPage })));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then(module => ({ default: module.RegisterPage })));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
+const ProjectsPage = lazy(() => import('@/pages/ProjectsPage').then(module => ({ default: module.ProjectsPage })));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(module => ({ default: module.SettingsPage })));
 
 const PageLoadingFallback = () => {
   return (
@@ -64,6 +67,30 @@ const App = () => {
                   element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <DashboardPage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="projects" 
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ProjectsPage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="profile" 
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ProfilePage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="settings" 
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <SettingsPage />
                     </Suspense>
                   } 
                 />
