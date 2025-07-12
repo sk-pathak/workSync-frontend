@@ -12,8 +12,11 @@ const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(module => ({ 
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then(module => ({ default: module.RegisterPage })));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
 const ProjectsPage = lazy(() => import('@/pages/ProjectsPage').then(module => ({ default: module.ProjectsPage })));
+const ProjectDetailPage = lazy(() => import('@/pages/ProjectDetailPage').then(module => ({ default: module.ProjectDetailPage })));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(module => ({ default: module.SettingsPage })));
+const NotificationsPage = lazy(() => import('@/pages/NotificationsPage').then(module => ({ default: module.NotificationsPage })));
+const ProjectCreatePage = lazy(() => import('@/pages/ProjectCreatePage').then(module => ({ default: module.ProjectCreatePage })));
 
 const PageLoadingFallback = () => {
   return (
@@ -79,6 +82,22 @@ const App = () => {
                   } 
                 />
                 <Route 
+                  path="projects/new" 
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ProjectCreatePage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="projects/:id" 
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ProjectDetailPage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
                   path="profile" 
                   element={
                     <Suspense fallback={<PageLoadingFallback />}>
@@ -91,6 +110,14 @@ const App = () => {
                   element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <SettingsPage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="notifications" 
+                  element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <NotificationsPage />
                     </Suspense>
                   } 
                 />
