@@ -61,6 +61,12 @@ export const ProjectsPage = () => {
     queryFn: () => userApi.getStarredProjects(),
   });
 
+  const { data: joinedProjectsResponse } = useQuery({
+    queryKey: ['joined-projects'],
+    queryFn: () => userApi.getJoinedProjects(),
+  });
+  const joinedProjectIds = new Set((joinedProjectsResponse?.content || []).map((p: Project) => p.id));
+
   const projects = projectsResponse?.content || [];
   const starredProjects = starredProjectsResponse?.content || [];
   
@@ -119,10 +125,30 @@ export const ProjectsPage = () => {
         description: 'Your request to join the project has been sent to the owner.',
       });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['joined-projects'] });
     },
     onError: (error: any) => {
       toast({
         title: 'Failed to join project',
+        description: error.response?.data?.message || 'Something went wrong',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const leaveMutation = useMutation({
+    mutationFn: projectsApi.leave,
+    onSuccess: () => {
+      toast({
+        title: 'Left project',
+        description: 'You have left the project.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['joined-projects'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Failed to leave project',
         description: error.response?.data?.message || 'Something went wrong',
         variant: 'destructive',
       });
@@ -139,6 +165,10 @@ export const ProjectsPage = () => {
 
   const handleJoin = (projectId: string) => {
     joinMutation.mutate(projectId);
+  };
+
+  const handleLeave = (projectId: string) => {
+    leaveMutation.mutate(projectId);
   };
 
   const handleEdit = (project: Project) => {
@@ -345,7 +375,7 @@ export const ProjectsPage = () => {
             className="mt-6 pt-6 border-t border-white/10"
           >
             <div className="flex justify-center">
-              <div className="w-full max-w-md bg-surface-hover/90 rounded-2xl border border-white/10 shadow-xl p-8 flex flex-col md:flex-row md:items-center md:gap-8 gap-6 my-8">
+              <div className="w-full max-w-4xl bg-surface-hover/90 rounded-2xl border border-white/10 shadow-xl p-4 flex flex-col md:flex-row md:items-center md:gap-8 gap-2 my-8">
                 {/* Status Filter */}
                 <div className="flex-1 flex flex-col items-center md:items-start">
                   <label className="text-sm font-medium text-text-secondary mb-2">Status</label>
@@ -354,7 +384,7 @@ export const ProjectsPage = () => {
                       value={filters.status || 'all'}
                       onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? undefined : value as ProjectStatus }))}
                     >
-                      <SelectTrigger className="w-full h-11 rounded-lg border border-white/10 bg-surface-hover/90 shadow focus:border-accent/60 focus:ring-2 focus:ring-accent/30 transition-all text-base">
+                      <SelectTrigger className="w-full h-10 rounded-lg border border-white/10 bg-surface-hover/90 shadow focus:border-accent/60 focus:ring-2 focus:ring-accent/30 transition-all text-base">
                         <SelectValue placeholder="All Status" />
                       </SelectTrigger>
                       <SelectContent className="glass-card rounded-lg shadow-lg">
@@ -390,7 +420,7 @@ export const ProjectsPage = () => {
                         }
                       }}
                     >
-                      <SelectTrigger className="w-full h-11 rounded-lg border border-white/10 bg-surface-hover/90 shadow focus:border-accent/60 focus:ring-2 focus:ring-accent/30 transition-all text-base">
+                      <SelectTrigger className="w-full h-10 rounded-lg border border-white/10 bg-surface-hover/90 shadow focus:border-accent/60 focus:ring-2 focus:ring-accent/30 transition-all text-base">
                         <SelectValue placeholder="All Projects" />
                       </SelectTrigger>
                       <SelectContent className="glass-card rounded-lg shadow-lg">
@@ -516,16 +546,7 @@ export const ProjectsPage = () => {
                       </div>
 
                       {/* Progress */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-text-secondary">Progress</span>
-                          <span className="text-accent font-semibold">{getProgress(project)}%</span>
-                        </div>
-                        <Progress 
-                          value={getProgress(project)} 
-                          className="h-2 bg-surface-hover" 
-                        />
-                      </div>
+                      {/* Removed progress bar and its container */}
 
                       {/* Project Meta */}
                       <div className="flex items-center justify-between text-xs text-text-secondary">
@@ -555,14 +576,25 @@ export const ProjectsPage = () => {
                         
                         <div className="flex items-center space-x-1">
                           {user && user.id !== project.ownerId && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleJoin(project.id)}
-                              className="text-xs glass-button"
-                            >
-                              Join
-                            </Button>
+                            joinedProjectIds.has(project.id) ? (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleLeave(project.id)}
+                                className="text-xs glass-button"
+                              >
+                                Leave
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleJoin(project.id)}
+                                className="text-xs glass-button"
+                              >
+                                Join
+                              </Button>
+                            )
                           )}
                           {user && user.id === project.ownerId && (
                             <Button
