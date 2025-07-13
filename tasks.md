@@ -9,11 +9,9 @@
 - rate limiting?
 
 ## Frontend
-- design overhaul
-- projects page (if owner -> You, progress, members, style search box and filter better)
-- join/leave
+- design overhaul (dashboard, projectDetail)
 - main context box scrolling for no reason
-- task status
+- task progress
 - github url
 - projects visible to everyone
 - landing page

@@ -79,80 +79,85 @@ export const ProjectCreatePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-dark p-4">
-      <Card className="w-full max-w-lg glass-card">
-        <CardHeader>
-          <div className="flex items-center mb-2">
-            <Button asChild variant="ghost" size="icon" className="glass-button mr-2" tabIndex={-1}>
+    <div className="fixed inset-0 flex items-center justify-center min-h-screen bg-gradient-dark">
+      <div className="relative w-full max-w-md mx-auto">
+        <Card className="glass-card backdrop-blur-2xl bg-white/10 border border-purple-400/30 shadow-2xl rounded-3xl p-0 overflow-hidden" style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)', border: '1.5px solid rgba(255,255,255,0.18)' }}>
+          <div className="absolute -inset-0.5 rounded-3xl pointer-events-none border-2 border-purple-400/30" style={{ filter: 'blur(6px)', opacity: 0.5 }}></div>
+          <CardHeader className="z-10 relative px-8 pt-8 pb-4 flex flex-row items-center gap-3">
+            <Button asChild variant="ghost" size="icon" className="glass-button !bg-transparent border border-white/20 hover:bg-white/10 transition mr-2" tabIndex={-1}>
               <a href="/projects" aria-label="Back to Projects">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </a>
             </Button>
-            <CardTitle className="text-2xl font-bold text-primary drop-shadow">Create New Project</CardTitle>
-          </div>
-        </CardHeader>
-        <Separator />
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Project Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter project name"
-                  {...register('name')}
-                  className={errors.name ? 'border-destructive' : ''}
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Enter project description"
-                  {...register('description')}
-                  rows={3}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Public Project</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Allow anyone to view and request to join this project
-                  </p>
+            <CardTitle className="text-3xl font-bold text-white drop-shadow-lg tracking-tight">Create New Project</CardTitle>
+          </CardHeader>
+          <Separator className="bg-white/20 mx-8" />
+          <CardContent className="z-10 relative px-8 py-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="name" className="text-white text-base font-medium">Project Name *</Label>
+                  <Input
+                    id="name"
+                    placeholder="Enter project name"
+                    {...register('name')}
+                    className={`glass-input text-lg px-4 py-3 ${errors.name ? 'border-destructive' : 'border-white/20'} bg-white/15 text-white placeholder:text-white/60 focus:border-accent/60 focus:ring-2 focus:ring-accent/30 rounded-xl`}
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+                  )}
                 </div>
-                <Switch
-                  checked={watch('isPublic')}
-                  onCheckedChange={(checked) => setValue('isPublic', checked)}
-                />
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="description" className="text-white text-base font-medium">Description</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Enter project description"
+                    {...register('description')}
+                    rows={3}
+                    className="glass-input text-lg px-4 py-3 bg-white/15 text-white placeholder:text-white/60 border-white/20 focus:border-accent/60 focus:ring-2 focus:ring-accent/30 rounded-xl"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-white text-base font-medium">Public Project</Label>
+                      <p className="text-sm text-white/60 mt-1">
+                        Allow anyone to view and request to join this project
+                      </p>
+                    </div>
+                    <Switch
+                      checked={watch('isPublic')}
+                      onCheckedChange={(checked) => setValue('isPublic', checked)}
+                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-white/20 scale-125"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="status" className="text-white text-base font-medium">Project Status</Label>
+                  <select
+                    id="status"
+                    {...register('status')}
+                    className="glass-input w-full text-lg px-4 py-3 bg-white/15 text-white border-white/20 focus:border-accent/60 focus:ring-2 focus:ring-accent/30 rounded-xl shadow"
+                    defaultValue="PLANNED"
+                  >
+                    <option value="PLANNED">Planned</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="ON_HOLD">On Hold</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Project Status</Label>
-                <select
-                  id="status"
-                  {...register('status')}
-                  className="neu-input w-full"
-                  defaultValue="PLANNED"
-                >
-                  <option value="PLANNED">Planned</option>
-                  <option value="ACTIVE">Active</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="ON_HOLD">On Hold</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
-              </div>
-            </div>
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Project
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <Button type="submit" disabled={isLoading} className="w-full glass-button bg-gradient-to-r from-purple-500/80 to-accent/80 text-white hover:from-purple-600 hover:to-accent/90 font-semibold text-lg py-3 rounded-xl shadow-lg border-2 border-purple-400/30 transition-all duration-200">
+                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                Create Project
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
