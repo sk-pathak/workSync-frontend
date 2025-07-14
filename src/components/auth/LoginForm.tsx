@@ -49,38 +49,38 @@ export const LoginForm = () => {
 
   return (
     <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-      <Card className="neu-card">
-        <CardContent className="p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+      <Card className="glass-card border-0 shadow-2xl">
+        <CardContent className="p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-3">
+              <Label htmlFor="username" className="text-white font-medium">Username</Label>
               <Input
                 id="username"
                 type="text"
                 placeholder="Enter your username"
                 {...register('username')}
-                className={errors.username ? 'border-destructive' : ''}
+                className={`glass-input ${errors.username ? 'border-red-400' : ''}`}
               />
               {errors.username && (
-                <p className="text-sm text-destructive">{errors.username.message}</p>
+                <p className="text-sm text-red-300">{errors.username.message}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-3">
+              <Label htmlFor="password" className="text-white font-medium">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   {...register('password')}
-                  className={errors.password ? 'border-destructive' : ''}
+                  className={`glass-input ${errors.password ? 'border-red-400' : ''}`}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400 hover:text-white"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -91,21 +91,21 @@ export const LoginForm = () => {
                 </Button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-red-300">{errors.password.message}</p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full glass-button h-12 text-lg font-medium" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               Sign In
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm">
-            Don't have an account?{' '}
+          <div className="mt-8 text-center text-sm">
+            <span className="text-gray-300">Don't have an account? </span>
             <Link
               to="/register"
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-purple-300 hover:text-purple-200 transition-colors duration-200"
             >
               Sign up
             </Link>

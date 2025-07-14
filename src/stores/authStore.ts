@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
+import { authApi } from '@/lib/api';
+import { webSocketService } from '@/lib/websocket';
+import { queryClient } from '@/lib/queryConfig';
+import { clearAllStores } from '@/lib/utils';
 
 interface AuthState {
   user: User | null;
@@ -23,8 +27,22 @@ export const useAuthStore = create<AuthState>()(
         set({ user, token, isAuthenticated: true });
       },
       
-      logout: () => {
+      logout: async () => {
+        webSocketService.disconnect();
+        
+        await authApi.logout();
+        
         localStorage.removeItem('token');
+        localStorage.removeItem('auth-storage');
+        Object.keys(sessionStorage).forEach(key => {
+          if (key.startsWith('cache_')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+        
+        clearAllStores();
+        queryClient.clear();
+        
         set({ user: null, token: null, isAuthenticated: false });
       },
       
