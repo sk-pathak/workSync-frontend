@@ -1,6 +1,18 @@
 export type ProjectStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'BLOCKED';
-export type NotificationType = 'JOIN_REQUEST' | 'TASK_ASSIGNED' | 'PROJECT_UPDATED';
+export type NotificationType =
+  | 'JOIN_REQUEST'
+  | 'JOIN_APPROVED'
+  | 'JOIN_REJECTED'
+  | 'MEMBER_REMOVED'
+  | 'TASK_ASSIGNED'
+  | 'TASK_STATUS_CHANGED'
+  | 'TASK_DUE_SOON'
+  | 'TASK_OVERDUE'
+  | 'PROJECT_UPDATED'
+  | 'PROJECT_STATUS_CHANGED'
+  | 'TASK_COMMENTED'
+  | 'MENTIONED_IN_COMMENT';
 export type NotificationStatus = 'PENDING' | 'READ' | 'DISMISSED';
 
 export interface User {
@@ -31,6 +43,15 @@ export interface Project {
   progress?: number;
   isStarred?: boolean;
   memberCount?: number;
+  totalTasks?: number;
+  completedTasks?: number;
+  progressPercentage?: number;
+  taskStatusBreakdown?: {
+    TODO: number;
+    IN_PROGRESS: number;
+    DONE: number;
+    BLOCKED: number;
+  };
 }
 
 export interface ProjectMember {
@@ -62,14 +83,36 @@ export interface Notification {
   id: string;
   recipientId: string;
   senderId?: string;
+  sender?: User | null;
   projectId?: string;
+  project?: Project | null;
   type: NotificationType;
   status: NotificationStatus;
-  payload?: string;
+  payload: string | null;
   createdAt: string;
   updatedAt: string;
-  sender?: User;
-  project?: Project;
+}
+
+export interface TaskAssignmentPayload {
+  taskId: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+  priority?: number;
+}
+
+export interface TaskStatusChangePayload {
+  taskId: string;
+  title: string;
+  oldStatus: string;
+  newStatus: string;
+}
+
+export interface TaskCommentPayload {
+  taskId: string;
+  title: string;
+  commentId: string;
+  commentText: string;
 }
 
 export interface Chat {
