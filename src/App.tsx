@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, memo, useMemo } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { Layout } from '@/components/layout/Layout';
 import { useAuthStore } from '@/stores/authStore';
@@ -18,7 +18,7 @@ const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(module => ({
 const NotificationsPage = lazy(() => import('@/pages/NotificationsPage').then(module => ({ default: module.NotificationsPage })));
 const ProjectCreatePage = lazy(() => import('@/pages/ProjectCreatePage').then(module => ({ default: module.ProjectCreatePage })));
 
-const PageLoadingFallback = () => {
+const PageLoadingFallback = memo(() => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-dark">
       <div className="text-center">
@@ -27,14 +27,74 @@ const PageLoadingFallback = () => {
       </div>
     </div>
   );
-}
+});
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+PageLoadingFallback.displayName = 'PageLoadingFallback';
+
+const ProtectedRoute = memo(({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
-}
+});
 
-const App = () => {
+ProtectedRoute.displayName = 'ProtectedRoute';
+
+const RouteWrapper = memo(({
+  element,
+  fallback = <PageLoadingFallback />
+}: {
+  element: React.ReactNode;
+  fallback?: React.ReactNode;
+}) => (
+  <Suspense fallback={fallback}>
+    {element}
+  </Suspense>
+));
+
+RouteWrapper.displayName = 'RouteWrapper';
+
+const App = memo(() => {
+  const authRoutes = useMemo(() => [
+    {
+      path: "/login",
+      element: <LoginPage />
+    },
+    {
+      path: "/register",
+      element: <RegisterPage />
+    }
+  ], []);
+
+  const protectedRoutes = useMemo(() => [
+    {
+      path: "dashboard",
+      element: <DashboardPage />
+    },
+    {
+      path: "projects",
+      element: <ProjectsPage />
+    },
+    {
+      path: "projects/new",
+      element: <ProjectCreatePage />
+    },
+    {
+      path: "projects/:id",
+      element: <ProjectDetailPage />
+    },
+    {
+      path: "profile",
+      element: <ProfilePage />
+    },
+    {
+      path: "settings",
+      element: <SettingsPage />
+    },
+    {
+      path: "notifications",
+      element: <NotificationsPage />
+    }
+  ], []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -42,22 +102,13 @@ const App = () => {
           <Router>
             <div className="space-bg" />
             <Routes>
-              <Route 
-                path="/login" 
-                element={
-                  <Suspense fallback={<PageLoadingFallback />}>
-                    <LoginPage />
-                  </Suspense>
-                } 
-              />
-              <Route 
-                path="/register" 
-                element={
-                  <Suspense fallback={<PageLoadingFallback />}>
-                    <RegisterPage />
-                  </Suspense>
-                } 
-              />
+              {authRoutes.map(({ path, element }) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={<RouteWrapper element={element} />}
+                />
+              ))}
               <Route
                 path="/*"
                 element={
@@ -66,62 +117,13 @@ const App = () => {
                   </ProtectedRoute>
                 }
               >
-                <Route 
-                  path="dashboard" 
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <DashboardPage />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="projects" 
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <ProjectsPage />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="projects/new" 
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <ProjectCreatePage />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="projects/:id" 
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <ProjectDetailPage />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="profile" 
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <ProfilePage />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="settings" 
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <SettingsPage />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="notifications" 
-                  element={
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <NotificationsPage />
-                    </Suspense>
-                  } 
-                />
+                {protectedRoutes.map(({ path, element }) => (
+                  <Route
+                    key={path}
+                    path={path}
+                    element={<RouteWrapper element={element} />}
+                  />
+                ))}
                 <Route path="" element={<Navigate to="/dashboard" />} />
               </Route>
             </Routes>
@@ -131,6 +133,8 @@ const App = () => {
       </QueryClientProvider>
     </ErrorBoundary>
   );
-}
+});
+
+App.displayName = 'App';
 
 export default App;
