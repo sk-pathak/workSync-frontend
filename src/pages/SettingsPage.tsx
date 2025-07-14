@@ -15,7 +15,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/stores/authStore';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,9 +29,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { useAuthStore } from '@/stores/authStore';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(6, 'Current password is required'),
@@ -56,7 +56,6 @@ export const SettingsPage = () => {
     showProjects: true,
   });
 
-  const { toast } = useToast();
   const { logout } = useAuthStore();
 
   const {
@@ -69,31 +68,34 @@ export const SettingsPage = () => {
   });
 
   const onPasswordSubmit = () => {
-    toast({
-      title: 'Password updated',
+    toast.success('Password updated', {
       description: 'Your password has been successfully changed.',
     });
     reset();
   };
 
-  const handleDeleteAccount = () => {
-    toast({
-      title: 'Account deleted',
-      description: 'Your account has been permanently deleted.',
-    });
-    logout();
+  const handleDeleteAccount = async () => {
+    try {
+      await logout();
+      toast.success('Account deleted', {
+        description: 'Your account has been permanently deleted.',
+      });
+    } catch (error) {
+      console.error('Delete account error:', error);
+      toast.error('Failed to delete account', {
+        description: 'Please try again later.',
+      });
+    }
   };
 
   const saveNotificationSettings = () => {
-    toast({
-      title: 'Settings saved',
+    toast.success('Settings saved', {
       description: 'Your notification preferences have been updated.',
     });
   };
 
   const savePrivacySettings = () => {
-    toast({
-      title: 'Settings saved',
+    toast.success('Settings saved', {
       description: 'Your privacy settings have been updated.',
     });
   };
@@ -129,28 +131,36 @@ export const SettingsPage = () => {
               value="notifications"
               className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
             >
-              <Bell className="w-4 h-4 mr-2" />
+              <span className="inline-flex items-center justify-center bg-accent/10 rounded-full p-1 mr-3">
+                <Bell className="w-5 h-5 text-accent drop-shadow" />
+              </span>
               <span className="group-data-[state=active]:text-accent">Notifications</span>
             </TabsTrigger>
             <TabsTrigger
               value="privacy"
               className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
             >
-              <Shield className="w-4 h-4 mr-2" />
+              <span className="inline-flex items-center justify-center bg-accent/10 rounded-full p-1 mr-3">
+                <Shield className="w-5 h-5 text-accent drop-shadow" />
+              </span>
               <span className="group-data-[state=active]:text-accent">Privacy</span>
             </TabsTrigger>
             <TabsTrigger
               value="security"
               className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
             >
-              <Key className="w-4 h-4 mr-2" />
+              <span className="inline-flex items-center justify-center bg-accent/10 rounded-full p-1 mr-3">
+                <Key className="w-5 h-5 text-accent drop-shadow" />
+              </span>
               <span className="group-data-[state=active]:text-accent">Security</span>
             </TabsTrigger>
             <TabsTrigger
               value="account"
               className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none"
             >
-              <Trash2 className="w-4 h-4 mr-2" />
+              <span className="inline-flex items-center justify-center bg-accent/10 rounded-full p-1 mr-3">
+                <Trash2 className="w-5 h-5 text-accent drop-shadow" />
+              </span>
               <span className="group-data-[state=active]:text-accent">Account</span>
             </TabsTrigger>
           </TabsList>
@@ -177,10 +187,7 @@ export const SettingsPage = () => {
                     </div>
                     <Switch
                       checked={notifications.email}
-                      onCheckedChange={(checked) =>
-                        setNotifications(prev => ({ ...prev, email: checked }))
-                      }
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
+                      onCheckedChange={e => setNotifications(prev => ({ ...prev, email: e }))}
                     />
                   </div>
 
@@ -193,10 +200,7 @@ export const SettingsPage = () => {
                     </div>
                     <Switch
                       checked={notifications.push}
-                      onCheckedChange={(checked) =>
-                        setNotifications(prev => ({ ...prev, push: checked }))
-                      }
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
+                      onCheckedChange={e => setNotifications(prev => ({ ...prev, push: e }))}
                     />
                   </div>
 
@@ -209,10 +213,7 @@ export const SettingsPage = () => {
                     </div>
                     <Switch
                       checked={notifications.projectUpdates}
-                      onCheckedChange={(checked) =>
-                        setNotifications(prev => ({ ...prev, projectUpdates: checked }))
-                      }
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
+                      onCheckedChange={e => setNotifications(prev => ({ ...prev, projectUpdates: e }))}
                     />
                   </div>
 
@@ -225,10 +226,7 @@ export const SettingsPage = () => {
                     </div>
                     <Switch
                       checked={notifications.taskAssignments}
-                      onCheckedChange={(checked) =>
-                        setNotifications(prev => ({ ...prev, taskAssignments: checked }))
-                      }
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
+                      onCheckedChange={e => setNotifications(prev => ({ ...prev, taskAssignments: e }))}
                     />
                   </div>
 
@@ -241,10 +239,7 @@ export const SettingsPage = () => {
                     </div>
                     <Switch
                       checked={notifications.joinRequests}
-                      onCheckedChange={(checked) =>
-                        setNotifications(prev => ({ ...prev, joinRequests: checked }))
-                      }
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
+                      onCheckedChange={e => setNotifications(prev => ({ ...prev, joinRequests: e }))}
                     />
                   </div>
                 </div>
@@ -279,10 +274,7 @@ export const SettingsPage = () => {
                     </div>
                     <Switch
                       checked={privacy.profileVisible}
-                      onCheckedChange={(checked) =>
-                        setPrivacy(prev => ({ ...prev, profileVisible: checked }))
-                      }
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
+                      onCheckedChange={e => setPrivacy(prev => ({ ...prev, profileVisible: e }))}
                     />
                   </div>
 
@@ -295,10 +287,7 @@ export const SettingsPage = () => {
                     </div>
                     <Switch
                       checked={privacy.showEmail}
-                      onCheckedChange={(checked) =>
-                        setPrivacy(prev => ({ ...prev, showEmail: checked }))
-                      }
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
+                      onCheckedChange={e => setPrivacy(prev => ({ ...prev, showEmail: e }))}
                     />
                   </div>
 
@@ -311,10 +300,7 @@ export const SettingsPage = () => {
                     </div>
                     <Switch
                       checked={privacy.showProjects}
-                      onCheckedChange={(checked) =>
-                        setPrivacy(prev => ({ ...prev, showProjects: checked }))
-                      }
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-hover"
+                      onCheckedChange={e => setPrivacy(prev => ({ ...prev, showProjects: e }))}
                     />
                   </div>
                 </div>

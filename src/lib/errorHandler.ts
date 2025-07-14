@@ -1,4 +1,4 @@
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export interface ErrorInfo {
   title: string;
@@ -15,74 +15,56 @@ export class ErrorHandler {
     const errorMessage = typeof error === 'string' ? error : error.message;
     const errorTitle = title || 'Something went wrong';
     
-    toast({
-      title: errorTitle,
+    toast.error(errorTitle, {
       description: errorMessage,
-      variant: 'destructive',
     });
   }
 
   static showWarning(message: string, title?: string) {
-    toast({
-      title: title || 'Warning',
+    toast.warning(title || 'Warning', {
       description: message,
-      variant: 'default',
     });
   }
 
   static showInfo(message: string, title?: string) {
-    toast({
-      title: title || 'Information',
+    toast.info(title || 'Information', {
       description: message,
-      variant: 'default',
     });
   }
 
   static showSuccess(message: string, title?: string) {
-    toast({
-      title: title || 'Success',
+    toast.success(title || 'Success', {
       description: message,
-      variant: 'default',
     });
   }
 
   static showNetworkError() {
-    toast({
-      title: 'Connection Lost',
+    toast.error('Connection Lost', {
       description: 'Unable to connect to the server. Please check your internet connection.',
-      variant: 'destructive',
     });
   }
 
   static showNetworkRestored() {
-    toast({
-      title: 'Connection Restored',
+    toast.success('Connection Restored', {
       description: 'You are back online and connected to the server.',
-      variant: 'default',
     });
   }
 
   static showAuthError(error?: string) {
-    toast({
-      title: 'Authentication Failed',
+    toast.error('Authentication Failed', {
       description: error || 'Please check your credentials and try again.',
-      variant: 'destructive',
     });
   }
 
   static showWebSocketError(error?: string) {
-    toast({
-      title: 'Real-time Connection Failed',
+    toast.error('Real-time Connection Failed', {
       description: error || 'Unable to establish real-time connection. Chat features may be limited.',
-      variant: 'destructive',
     });
   }
 
   static showWebSocketConnected() {
-    toast({
-      title: 'Real-time Connected',
+    toast.success('Real-time Connected', {
       description: 'Real-time features are now available.',
-      variant: 'default',
     });
   }
 
