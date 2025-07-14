@@ -1,30 +1,73 @@
-import * as React from 'react';
-import * as SwitchPrimitives from '@radix-ui/react-switch';
-
+import { memo, forwardRef } from 'react';
+import { InputSwitch } from 'primereact/inputswitch';
 import { cn } from '@/lib/utils';
 
-const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
->(({ className, ...props }, ref) => (
-  <SwitchPrimitives.Root
-    className={cn(
-      'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
-      'border-border data-[state=checked]:bg-accent data-[state=unchecked]:bg-input data-[state=checked]:border-accent data-[state=unchecked]:border-border',
-      className
-    )}
-    {...props}
-    ref={ref}
-  >
-    <SwitchPrimitives.Thumb
-      className={cn(
-        'pointer-events-none block h-4 w-4 rounded-full shadow-lg ring-0 transition-transform',
-        'data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0',
-        'bg-white data-[state=unchecked]:bg-muted'
-      )}
-    />
-  </SwitchPrimitives.Root>
-));
-Switch.displayName = SwitchPrimitives.Root.displayName;
+interface SwitchProps {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
+  className?: string;
+  size?: 'sm' | 'md' | 'lg';
+  label?: string;
+  description?: string;
+}
 
-export { Switch };
+export const Switch = memo(forwardRef<HTMLDivElement, SwitchProps>(
+  ({ 
+    checked, 
+    onCheckedChange, 
+    disabled = false, 
+    className = '',
+    size = 'md',
+    label,
+    description,
+    ...props 
+  }, ref) => {
+    const sizeClasses = {
+      sm: 'scale-75',
+      md: 'scale-90',
+      lg: 'scale-110',
+    };
+
+    const switchComponent = (
+      <InputSwitch
+        checked={checked}
+        onChange={(e) => onCheckedChange(e.value)}
+        disabled={disabled}
+        className={cn(
+          sizeClasses[size],
+          className
+        )}
+        {...props}
+      />
+    );
+
+    if (label || description) {
+      return (
+        <div ref={ref} className="flex items-center justify-between p-4 rounded-lg bg-surface/50 border border-border/50">
+          <div className="space-y-1">
+            {label && (
+              <label className="text-text-primary font-medium cursor-pointer">
+                {label}
+              </label>
+            )}
+            {description && (
+              <p className="text-text-secondary text-sm">
+                {description}
+              </p>
+            )}
+          </div>
+          {switchComponent}
+        </div>
+      );
+    }
+
+    return (
+      <div ref={ref}>
+        {switchComponent}
+      </div>
+    );
+  }
+));
+
+Switch.displayName = 'Switch'; 
