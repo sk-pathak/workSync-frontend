@@ -29,8 +29,11 @@ export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { unreadCount } = useNotificationStore();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
 
+  const filteredNavigation = navigation.filter(
+    (item) => item.name !== 'Analytics' || (user && user.role === 'ADMIN')
+  );
 
   const handleLogout = async () => {
     try {
@@ -80,7 +83,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {navigation.map((item) => {
+        {filteredNavigation.map((item) => {
           const isActive = location.pathname === item.href;
           return (
             <Link key={item.name} to={item.href}>

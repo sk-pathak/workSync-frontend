@@ -7,6 +7,7 @@ import { Layout } from '@/components/layout/Layout';
 import { useAuthStore } from '@/stores/authStore';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { queryClient } from '@/lib/queryConfig';
+import { AnalyticsPage } from '@/pages/AnalyticsPage';
 
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(module => ({ default: module.LoginPage })));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then(module => ({ default: module.RegisterPage })));
@@ -92,6 +93,10 @@ const App = memo(() => {
     {
       path: "notifications",
       element: <NotificationsPage />
+    },
+    {
+      path: "analytics",
+      element: <AnalyticsPage />
     }
   ], []);
 

@@ -1,12 +1,8 @@
 ## Backend
 - settings
-- analytics
+- github analytics
 - joining project should need approval from owner
-- avatar pics??
-- rate limiting?
+- avatar pics?
 
 ## Frontend
-- github url
-- analytics
-- projects visible to everyone
-- landing page?
+- github url & analytics

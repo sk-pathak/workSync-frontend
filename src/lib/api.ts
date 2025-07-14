@@ -439,6 +439,12 @@ export const analyticsApi = {
     });
     return res.data;
   },
+  getGeneralAnalytics: async (): Promise<any> => {
+    const cached = getCachedResponse('/api/analytics/overview');
+    if (cached) return cached;
+    const res = await api.get('/api/analytics/overview');
+    return res.data;
+  },
 };
 
 export const cacheUtils = {
