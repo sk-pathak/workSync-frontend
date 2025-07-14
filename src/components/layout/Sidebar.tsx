@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useAuthStore } from '@/stores/authStore';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -30,15 +30,19 @@ export function Sidebar() {
   const navigate = useNavigate();
   const { unreadCount } = useNotificationStore();
   const { logout } = useAuthStore();
-  const { toast } = useToast();
 
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: 'Logged out',
-      description: 'You have been successfully logged out.',
-    });
-    navigate('/login');
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out', {
+        description: 'You have been successfully logged out.',
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      navigate('/login');
+    }
   };
 
   return (

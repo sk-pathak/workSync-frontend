@@ -11,11 +11,11 @@ import {
   Save,
   X,
   Camera,
-  Loader2,
   User,
   FolderOpen,
   Users,
   CheckCircle,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { userApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
 const profileSchema = z.object({
@@ -40,9 +40,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 export const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const { user, updateUser } = useAuthStore();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: userProjects = { content: [] } } = useQuery({
@@ -81,26 +79,21 @@ export const ProfilePage = () => {
     },
     onSuccess: (data: any) => {
       updateUser(data);
-      toast({
-        title: 'Profile updated',
+      toast.success('Profile updated', {
         description: 'Your profile has been successfully updated.',
       });
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ['user', 'me'] });
     },
     onError: (error: any) => {
-      toast({
-        title: 'Failed to update profile',
+      toast.error('Failed to update profile', {
         description: error.response?.data?.message || 'Something went wrong',
-        variant: 'destructive',
       });
     },
   });
 
   const onSubmit = (data: ProfileFormData) => {
-    setIsLoading(true);
     updateProfileMutation.mutate(data);
-    setIsLoading(false);
   };
 
   const handleCancel = () => {
@@ -279,70 +272,70 @@ export const ProfilePage = () => {
           </div>
 
           {/* Edit Profile */}
-          <Card className="glass-card">
-            <CardHeader className="pb-6">
+          <Card className="glass-card shadow-2xl p-2 md:p-6">
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center text-xl text-text-primary">
-                  <div className="p-2 rounded-lg bg-accent/20 mr-3">
-                    <Edit className="w-5 h-5 text-accent" />
+                <CardTitle className="flex items-center text-2xl font-bold text-white">
+                  <div className="p-3 rounded-xl bg-accent/20 mr-4">
+                    <Edit className="w-7 h-7 text-accent" />
                   </div>
                   Edit Profile
                 </CardTitle>
                 {!isEditing ? (
-                  <Button onClick={() => setIsEditing(true)} className="glass-button">
-                    <Edit className="w-4 h-4 mr-2" />
+                  <Button onClick={() => setIsEditing(true)} className="glass-button border-accent/60 shadow-md text-base px-5 py-2">
+                    <Edit className="w-5 h-5 mr-2" />
                     Edit
                   </Button>
                 ) : (
                   <div className="flex space-x-2">
-                    <Button onClick={handleCancel} className="glass-button bg-transparent border-border">
-                      <X className="w-4 h-4 mr-2" />
+                    <Button type="button" onClick={handleCancel} className="glass-button border border-gray-400/40 bg-transparent text-gray-200">
+                      <X className="w-5 h-5 mr-2" />
                       Cancel
                     </Button>
                   </div>
                 )}
               </div>
+              <Separator className="my-4 bg-white/10" />
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="name" className="text-text-primary font-medium">Full Name</Label>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-white font-semibold text-base">Full Name</Label>
                   <Input
                     id="name"
                     placeholder="Enter your full name"
                     {...register('name')}
                     disabled={!isEditing}
-                    className={`w-full neu-input ${errors.name ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
+                    className={`w-full glass-input ${errors.name ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
                   />
                   {errors.name && (
                     <p className="text-sm text-error mt-1">{errors.name.message}</p>
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="email" className="text-text-primary font-medium">Email</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-white font-semibold text-base">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="Enter your email"
                     {...register('email')}
                     disabled={!isEditing}
-                    className={`w-full neu-input ${errors.email ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
+                    className={`w-full glass-input ${errors.email ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
                   />
                   {errors.email && (
                     <p className="text-sm text-error mt-1">{errors.email.message}</p>
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="bio" className="text-text-primary font-medium">Bio</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="bio" className="text-white font-semibold text-base">Bio</Label>
                   <Textarea
                     id="bio"
                     placeholder="Tell us about yourself"
                     {...register('bio')}
                     disabled={!isEditing}
-                    rows={4}
-                    className={`w-full neu-input ${errors.bio ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
+                    className={`w-full glass-input min-h-[100px] ${errors.bio ? 'border-error focus:border-error focus:ring-error/20' : ''}`}
                   />
                   {errors.bio && (
                     <p className="text-sm text-error mt-1">{errors.bio.message}</p>
@@ -350,10 +343,13 @@ export const ProfilePage = () => {
                 </div>
 
                 {isEditing && (
-                  <Button type="submit" disabled={isLoading} className="glass-button w-full">
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Changes
+                  <Button type="submit" className="glass-button w-full h-12 text-lg font-semibold mt-6 shadow-lg" disabled={updateProfileMutation.isPending}>
+                    {updateProfileMutation.isPending ? (
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-5 h-5 mr-2" />
+                    )}
+                    {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
                   </Button>
                 )}
               </form>
