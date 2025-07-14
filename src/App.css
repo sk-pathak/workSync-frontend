@@ -1,35 +1,47 @@
 @import "tailwindcss";
 
 body {
-  @apply text-white min-h-screen antialiased transition-colors duration-300;
+  @apply text-white min-h-screen antialiased transition-colors duration-200;
   background: linear-gradient(135deg, #181825 0%, #232336 100%);
+  will-change: auto;
+  transform: translateZ(0);
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  background: #232336;
+  width: 6px;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #312e81;
-  border-radius: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4c46a6;
 }
 
 .neu-card {
-  @apply rounded-lg transition-shadow duration-200;
-  box-shadow: 8px 8px 24px #1a1a2e, -8px -8px 24px #2d2d44;
+  @apply rounded-lg transition-shadow duration-150;
+  box-shadow: 4px 4px 12px #1a1a2e, -4px -4px 12px #2d2d44;
+  will-change: box-shadow;
+  transform: translateZ(0);
 }
 
 .neu-btn {
-  @apply text-white rounded-lg transition-all duration-200;
+  @apply text-white rounded-lg transition-all duration-150;
   background: linear-gradient(135deg, #a259ff 0%, #6c2bd7 100%);
   box-shadow: 0 2px 8px 0 rgba(124, 58, 237, 0.15);
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
 }
 
 .neu-input {
-  @apply text-white rounded-md border focus:outline-none transition-all duration-200;
+  @apply text-white rounded-md border focus:outline-none transition-all duration-150;
   background: linear-gradient(135deg, #232136 0%, #2d2d44 100%);
   box-shadow: inset 2px 2px 8px #1a1a2e, inset -2px -2px 8px #2d2d44;
   border-color: #28283a;
+  will-change: box-shadow, border-color;
+  transform: translateZ(0);
 
   --tw-ring-color: #a259ff;
 }
@@ -38,9 +50,90 @@ body {
   @apply text-white rounded-b-lg;
   background: linear-gradient(135deg, #7c3aed 0%, #38bdf8 100%);
   box-shadow: 0 4px 24px 0 rgba(124, 58, 237, 0.12);
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .hover-neu:hover {
-  box-shadow: 0 8px 32px 0 rgba(124, 58, 237, 0.18);
-  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 6px 24px 0 rgba(124, 58, 237, 0.18);
+  transform: translateY(-1px) scale(1.005);
+}
+
+.glass-card {
+  background: rgba(30, 19, 47, 0.85);
+  border: 1px solid rgba(127, 90, 240, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 2px 16px 0 rgba(127, 90, 240, 0.08);
+  border-radius: 1.5rem;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.glass-button {
+  background: rgba(127, 90, 240, 0.1);
+  border: 1px solid rgba(127, 90, 240, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #e1e1e1;
+  border-radius: 0.75rem;
+  transition: all 0.15s ease-out;
+  will-change: transform, background, border-color;
+  transform: translateZ(0);
+}
+
+.glass-button:hover {
+  background: rgba(127, 90, 240, 0.18);
+  border-color: #9f7cff;
+  color: #fff;
+  transform: scale(1.01);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px) translateZ(0);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95) translateZ(0);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1) translateZ(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.15s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

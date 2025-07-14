@@ -45,7 +45,7 @@ export default {
         'gradient-dark': 'linear-gradient(135deg, #1a0f2a 0%, #1e132f 100%)',
       },
       boxShadow: {
-        glass: '0 2px 32px 0 rgba(127, 90, 240, 0.10)',
+        glass: '0 2px 16px 0 rgba(127, 90, 240, 0.08)',
       },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(135deg, #7f5af0 0%, #9f7cff 100%)',
@@ -54,7 +54,7 @@ export default {
         'gradient-surface': 'linear-gradient(135deg, #1e132f 0%, #24183a 100%)',
       },
       backdropBlur: {
-        glass: 'blur(16px)',
+        glass: 'blur(4px)',
       },
       transitionProperty: {
         'spacing': 'margin, padding',
@@ -71,7 +71,7 @@ export default {
           to: { opacity: 1 },
         },
         'pop': {
-          '0%': { transform: 'scale(0.95)' },
+          '0%': { transform: 'scale(0.98)' },
           '100%': { transform: 'scale(1)' },
         },
         'slide-in': {
@@ -79,20 +79,20 @@ export default {
           to: { transform: 'translateX(0)' },
         },
         'slide-up': {
-          from: { transform: 'translateY(20px)', opacity: 0 },
+          from: { transform: 'translateY(10px)', opacity: 0 },
           to: { transform: 'translateY(0)', opacity: 1 },
         },
         'count-up': {
-          from: { opacity: 0, transform: 'translateY(10px)' },
+          from: { opacity: 0, transform: 'translateY(5px)' },
           to: { opacity: 1, transform: 'translateY(0)' },
         },
       },
       animation: {
-        'fade-in': 'fade-in 0.2s ease-out',
-        'pop': 'pop 0.15s cubic-bezier(0.4,0,0.2,1)',
-        'slide-in': 'slide-in 0.2s ease-out',
-        'slide-up': 'slide-up 0.25s ease-out',
-        'count-up': 'count-up 0.4s ease-out',
+        'fade-in': 'fade-in 0.15s ease-out',
+        'pop': 'pop 0.1s cubic-bezier(0.4,0,0.2,1)',
+        'slide-in': 'slide-in 0.15s ease-out',
+        'slide-up': 'slide-up 0.15s ease-out',
+        'count-up': 'count-up 0.2s ease-out',
         'accordion-down': 'accordion-down 0.15s ease-out',
         'accordion-up': 'accordion-up 0.15s ease-out',
       },
@@ -103,27 +103,44 @@ export default {
     function({ addUtilities }) {
       addUtilities({
         '.glass-card': {
-          'background': 'rgba(30, 19, 47, 0.55)',
-          'border': '1.5px solid rgba(127, 90, 240, 0.22)',
-          'backdrop-filter': 'blur(16px)',
-          '-webkit-backdrop-filter': 'blur(16px)',
-          'box-shadow': '0 2px 32px 0 rgba(127, 90, 240, 0.10)',
+          'background': 'rgba(30, 19, 47, 0.85)',
+          'border': '1px solid rgba(127, 90, 240, 0.15)',
+          'backdrop-filter': 'blur(4px)',
+          '-webkit-backdrop-filter': 'blur(4px)',
+          'box-shadow': '0 2px 16px 0 rgba(127, 90, 240, 0.08)',
           'border-radius': '1.5rem',
+          'will-change': 'transform',
+          'transform': 'translateZ(0)',
         },
         '.glass-button': {
-          'background': 'rgba(127, 90, 240, 0.13)',
-          'border': '1.5px solid rgba(127, 90, 240, 0.22)',
-          'backdrop-filter': 'blur(12px)',
-          '-webkit-backdrop-filter': 'blur(12px)',
+          'background': 'rgba(127, 90, 240, 0.1)',
+          'border': '1px solid rgba(127, 90, 240, 0.15)',
+          'backdrop-filter': 'blur(4px)',
+          '-webkit-backdrop-filter': 'blur(4px)',
           'color': '#e1e1e1',
           'border-radius': '0.75rem',
           'transition': 'all 0.15s ease-out',
+          'will-change': 'transform, background, border-color',
+          'transform': 'translateZ(0)',
         },
         '.glass-button:hover': {
-          'background': 'rgba(127, 90, 240, 0.22)',
+          'background': 'rgba(127, 90, 240, 0.18)',
           'border-color': '#9f7cff',
           'color': '#fff',
-          'transform': 'scale(1.02)',
+          'transform': 'scale(1.01)',
+        },
+        '.hardware-accelerated': {
+          'transform': 'translateZ(0)',
+          'backface-visibility': 'hidden',
+          'perspective': '1000px',
+        },
+        '.smooth-scroll': {
+          'scroll-behavior': 'smooth',
+          '-webkit-overflow-scrolling': 'touch',
+        },
+        '.optimized-transition': {
+          'transition': 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+          'will-change': 'transform, opacity',
         },
       })
     }
