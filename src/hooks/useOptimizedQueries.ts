@@ -1,7 +1,79 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { projectsApi, tasksApi, userApi, notificationsApi } from '@/lib/api';
 import { queryKeys, queryConfigs, cacheUtils } from '@/lib/queryConfig';
 import type { Project, Task, ProjectFilters, UpdateProjectRequest, ProjectStatus } from '@/types';
+
+const defaultQueryOptions = {
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  gcTime: 10 * 60 * 1000, // 10 minutes
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: true,
+  retry: 3,
+  retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+};
+
+const defaultMutationOptions = {
+  retry: 1,
+  retryDelay: 1000,
+};
+
+export function useOptimizedQuery<TData = unknown, TError = unknown>(
+  queryKey: readonly unknown[],
+  queryFn: () => Promise<TData>,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey,
+    queryFn,
+    ...defaultQueryOptions,
+    ...options,
+  });
+}
+
+export function useOptimizedMutation<TData = unknown, TError = unknown, TVariables = unknown>(
+  mutationFn: (variables: TVariables) => Promise<TData>,
+  options?: Omit<UseMutationOptions<TData, TError, TVariables>, 'mutationFn'>
+) {
+  return useMutation({
+    mutationFn,
+    ...defaultMutationOptions,
+    ...options,
+  });
+}
+
+export function usePrefetchQuery() {
+  const queryClient = useQueryClient();
+  
+  return (queryKey: readonly unknown[], queryFn: () => Promise<unknown>) => {
+    queryClient.prefetchQuery({
+      queryKey,
+      queryFn,
+      ...defaultQueryOptions,
+    });
+  };
+}
+
+export function useOptimisticUpdate() {
+  const queryClient = useQueryClient();
+  
+  return <TData>(
+    queryKey: readonly unknown[],
+    updater: (oldData: TData | undefined) => TData
+  ) => {
+    queryClient.setQueryData(queryKey, updater);
+  };
+}
+
+export function useQueryPerformance() {
+  const queryClient = useQueryClient();
+  
+  return {
+    getQueryCount: () => queryClient.getQueryCache().getAll().length,
+    clearStaleQueries: () => queryClient.removeQueries({ stale: true }),
+    clearAllQueries: () => queryClient.clear(),
+    getQueryData: <T>(queryKey: readonly unknown[]) => queryClient.getQueryData<T>(queryKey),
+  };
+}
 
 export const useProjects = (filters?: ProjectFilters) => {
   return useQuery({
