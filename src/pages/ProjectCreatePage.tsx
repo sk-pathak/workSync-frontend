@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { projectsApi } from '@/lib/api';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import type { CreateProjectRequest } from '@/types';
 
 const projectSchema = z.object({
@@ -27,7 +27,7 @@ type ProjectFormData = z.infer<typeof projectSchema>;
 
 export const ProjectCreatePage = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -51,17 +51,14 @@ export const ProjectCreatePage = () => {
     mutationFn: (data: CreateProjectRequest) => projectsApi.create(data),
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      toast({
-        title: 'Project created',
+      toast.success('Project created', {
         description: 'Your project has been created successfully.',
       });
       navigate(`/projects/${project.id}`);
     },
     onError: (error: any) => {
-      toast({
-        title: 'Failed to create project',
+      toast.error('Failed to create project', {
         description: error.response?.data?.message || 'Something went wrong',
-        variant: 'destructive',
       });
     },
   });
@@ -130,7 +127,6 @@ export const ProjectCreatePage = () => {
                     <Switch
                       checked={watch('isPublic')}
                       onCheckedChange={(checked) => setValue('isPublic', checked)}
-                      className="data-[state=checked]:bg-accent data-[state=unchecked]:bg-white/20 scale-125"
                     />
                   </div>
                 </div>

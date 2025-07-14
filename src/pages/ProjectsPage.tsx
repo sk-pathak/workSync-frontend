@@ -1,11 +1,10 @@
-import { useState, Suspense, lazy, useRef } from 'react';
+import { useState, Suspense, lazy, useRef, memo, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Grid3X3, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Grid3X3,
   List,
   Star,
   Users,
@@ -30,9 +29,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
 import { projectsApi } from '@/lib/api';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import type { ProjectFilters, ProjectStatus, Project } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
@@ -40,17 +38,17 @@ import { userApi } from '@/lib/api';
 
 const ProjectSettingsDialog = lazy(() => import('@/components/projects/ProjectSettingsDialog').then(module => ({ default: module.ProjectSettingsDialog })));
 
-export const ProjectsPage = () => {
+export const ProjectsPage = memo(() => {
   const [filters, setFilters] = useState<ProjectFilters>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
+
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  
+
   const { data: projectsResponse, isLoading } = useQuery({
     queryKey: ['projects', filters],
     queryFn: () => projectsApi.getAll(filters),
@@ -65,11 +63,15 @@ export const ProjectsPage = () => {
     queryKey: ['joined-projects'],
     queryFn: () => userApi.getJoinedProjects(),
   });
-  const joinedProjectIds = new Set((joinedProjectsResponse?.content || []).map((p: Project) => p.id));
+
+  const joinedProjectIds = useMemo(() =>
+    new Set((joinedProjectsResponse?.content || []).map((p: Project) => p.id)),
+    [joinedProjectsResponse]
+  );
 
   const projects = projectsResponse?.content || [];
   const starredProjects = starredProjectsResponse?.content || [];
-  
+
   const starMutation = useMutation({
     mutationFn: ({ projectId, starred }: { projectId: string; starred: boolean }) => {
       return starred ? projectsApi.unstar(projectId) : projectsApi.star(projectId);
@@ -77,10 +79,10 @@ export const ProjectsPage = () => {
     onMutate: async ({ projectId, starred }) => {
       await queryClient.cancelQueries({ queryKey: ['projects'] });
       await queryClient.cancelQueries({ queryKey: ['starred-projects'] });
-      
+
       const previousProjects = queryClient.getQueryData(['projects']);
       const previousStarredProjects = queryClient.getQueryData(['starred-projects']);
-      
+
       queryClient.setQueryData(['starred-projects'], (old: any) => {
         if (!old?.content) return old;
         if (starred) {
@@ -99,7 +101,7 @@ export const ProjectsPage = () => {
         }
         return old;
       });
-      
+
       return { previousProjects, previousStarredProjects };
     },
     onError: (err, _, context) => {
@@ -120,18 +122,15 @@ export const ProjectsPage = () => {
   const joinMutation = useMutation({
     mutationFn: projectsApi.join,
     onSuccess: () => {
-      toast({
-        title: 'Join request sent',
+      toast.success('Join request sent', {
         description: 'Your request to join the project has been sent to the owner.',
       });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['joined-projects'] });
     },
     onError: (error: any) => {
-      toast({
-        title: 'Failed to join project',
+      toast.error('Failed to join project', {
         description: error.response?.data?.message || 'Something went wrong',
-        variant: 'destructive',
       });
     },
   });
@@ -139,18 +138,15 @@ export const ProjectsPage = () => {
   const leaveMutation = useMutation({
     mutationFn: projectsApi.leave,
     onSuccess: () => {
-      toast({
-        title: 'Left project',
+      toast.success('Left project', {
         description: 'You have left the project.',
       });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['joined-projects'] });
     },
     onError: (error: any) => {
-      toast({
-        title: 'Failed to leave project',
+      toast.error('Failed to leave project', {
         description: error.response?.data?.message || 'Something went wrong',
-        variant: 'destructive',
       });
     },
   });
@@ -175,27 +171,43 @@ export const ProjectsPage = () => {
     setEditingProject(project);
   };
 
-  const handleClearSearch = () => {
+  const handleClearSearch = useCallback(() => {
     setSearchQuery('');
     searchInputRef.current?.focus();
-  };
+  }, []);
 
-  const visibleProjects = projects.filter((project: Project) => {
-    if (project.isPublic) return true;
-    return user && user.id === project.ownerId;
-  });
+  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
 
-  const filteredProjects = visibleProjects.filter((project: Project) => {
-    if (!searchQuery.trim()) return true;
-    
-    const query = searchQuery.toLowerCase();
-    
-    return (
-      project.name.toLowerCase().includes(query) ||
-      project.description?.toLowerCase().includes(query) ||
-      false
-    );
-  });
+  const handleFilterChange = useCallback((key: keyof ProjectFilters, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const handleCloseEdit = useCallback(() => {
+    setEditingProject(null);
+  }, []);
+
+  const visibleProjects = useMemo(() =>
+    projects.filter((project: Project) => {
+      if (project.isPublic) return true;
+      return user && user.id === project.ownerId;
+    }), [projects, user]
+  );
+
+  const filteredProjectsMemo = useMemo(() => {
+    let filtered = visibleProjects;
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((project: Project) =>
+        project.name.toLowerCase().includes(query) ||
+        project.description?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [visibleProjects, searchQuery]);
 
   const getStatusColor = (status: ProjectStatus) => {
     switch (status) {
@@ -208,30 +220,17 @@ export const ProjectsPage = () => {
     }
   };
 
-  const getProgress = (project: Project) => {
-    if (project.tasks && Array.isArray(project.tasks)) {
-      const completedTasks = project.tasks.filter((t: any) => t.status === 'DONE').length;
-      const totalTasks = project.tasks.length;
-      return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-    }
-    return project.progress || 0;
-  };
-
   const stats = {
-    total: filteredProjects.length,
-    active: filteredProjects.filter(p => p.status === 'ACTIVE').length,
-    completed: filteredProjects.filter(p => p.status === 'COMPLETED').length,
+    total: filteredProjectsMemo.length,
+    active: filteredProjectsMemo.filter(p => p.status === 'ACTIVE').length,
+    completed: filteredProjectsMemo.filter(p => p.status === 'COMPLETED').length,
     starred: starredProjects.length,
   };
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 bg-gradient-dark min-h-screen">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
+      <div className="flex items-center justify-between animate-fade-in">
         <div className="flex items-center space-x-4">
           <div className="p-3 rounded-xl bg-gradient-primary">
             <FolderOpen className="w-8 h-8 text-white" />
@@ -249,15 +248,10 @@ export const ProjectsPage = () => {
             New Project
           </Link>
         </Button>
-      </motion.div>
+      </div>
 
       {/* Stats Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-4"
-      >
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <Card className="glass-card hover:scale-105 transition-transform duration-200">
           <CardContent className="p-4 text-center">
             <div className="flex items-center justify-center mb-2">
@@ -294,24 +288,19 @@ export const ProjectsPage = () => {
             <p className="text-sm text-text-secondary">Completed</p>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Filter & Sort Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="glass-card p-6 rounded-2xl"
-      >
-        <div className="flex flex-col lg:flex-row gap-4 items-center">
-          <div className="flex-1 w-full lg:w-auto">
-            <div className="relative group w-full max-w-xs">
+      <div className="glass-card p-6 rounded-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="flex flex-col gap-y-3 gap-x-4 lg:flex-row lg:items-center lg:gap-y-0 lg:gap-x-4 items-center w-full">
+          <div className="w-full lg:flex-1 lg:w-auto">
+            <div className="relative group w-full max-w-xs mx-auto lg:mx-0">
               {/* Search Input */}
               <Input
                 ref={searchInputRef}
                 placeholder="Search projects..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearch}
                 className="pl-12 pr-10 neu-input border-white/10 focus:border-accent/50 transition-all duration-300 group-hover:border-accent/30 relative z-10 text-left bg-transparent"
                 style={{ textAlign: 'left' }}
               />
@@ -320,60 +309,54 @@ export const ProjectsPage = () => {
               </span>
               {/* Clear Button */}
               {searchQuery && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
+                <button
                   onClick={handleClearSearch}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-surface-hover transition-colors z-20"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-surface-hover transition-colors z-20 animate-pop"
                   type="button"
                 >
                   <X className="w-4 h-4 text-text-secondary hover:text-text-primary" />
-                </motion.button>
+                </button>
               )}
             </div>
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-row items-center justify-center w-full gap-2 lg:w-auto">
+            {/* View Mode Toggle */}
+            <div className="flex items-center space-x-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="glass-button"
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="glass-button"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Filter Toggle */}
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              variant="ghost"
               size="sm"
-              onClick={() => setViewMode('grid')}
+              onClick={() => setShowFilters(!showFilters)}
               className="glass-button"
             >
-              <Grid3X3 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="glass-button"
-            >
-              <List className="w-4 h-4" />
+              <Filter className="w-4 h-4 mr-2" />
+              Filters
             </Button>
           </div>
-
-          {/* Filter Toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="glass-button"
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            Filters
-          </Button>
         </div>
 
         {/* Expandable Filters */}
         {showFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mt-6 pt-6 border-t border-white/10"
-          >
+          <div className="mt-6 pt-6 border-t border-white/10 animate-fade-in">
             <div className="flex justify-center">
               <div className="w-full max-w-4xl bg-surface-hover/90 rounded-2xl border border-white/10 shadow-xl p-4 flex flex-col md:flex-row md:items-center md:gap-8 gap-2 my-8">
                 {/* Status Filter */}
@@ -382,7 +365,7 @@ export const ProjectsPage = () => {
                   <div className="w-full flex items-center justify-center">
                     <Select
                       value={filters.status || 'all'}
-                      onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? undefined : value as ProjectStatus }))}
+                      onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value as ProjectStatus)}
                     >
                       <SelectTrigger className="w-full h-10 rounded-lg border border-white/10 bg-surface-hover/90 shadow focus:border-accent/60 focus:ring-2 focus:ring-accent/30 transition-all text-base">
                         <SelectValue placeholder="All Status" />
@@ -398,7 +381,6 @@ export const ProjectsPage = () => {
                     </Select>
                   </div>
                 </div>
-                {/* Divider for desktop only, hidden on mobile */}
                 <div className="hidden md:flex items-center justify-center mx-4 self-stretch">
                   <div className="h-full w-px bg-white/10 rounded-full" />
                 </div>
@@ -410,13 +392,21 @@ export const ProjectsPage = () => {
                       value={filters.owned ? 'owned' : filters.member ? 'member' : filters.starred ? 'starred' : 'all'}
                       onValueChange={(value) => {
                         if (value === 'owned') {
-                          setFilters(prev => ({ ...prev, owned: true, member: undefined, starred: undefined }));
+                          handleFilterChange('owned', true);
+                          handleFilterChange('member', undefined);
+                          handleFilterChange('starred', undefined);
                         } else if (value === 'member') {
-                          setFilters(prev => ({ ...prev, member: true, owned: undefined, starred: undefined }));
+                          handleFilterChange('member', true);
+                          handleFilterChange('owned', undefined);
+                          handleFilterChange('starred', undefined);
                         } else if (value === 'starred') {
-                          setFilters(prev => ({ ...prev, starred: true, owned: undefined, member: undefined }));
+                          handleFilterChange('starred', true);
+                          handleFilterChange('owned', undefined);
+                          handleFilterChange('member', undefined);
                         } else {
-                          setFilters(prev => ({ ...prev, owned: undefined, member: undefined, starred: undefined }));
+                          handleFilterChange('owned', undefined);
+                          handleFilterChange('member', undefined);
+                          handleFilterChange('starred', undefined);
                         }
                       }}
                     >
@@ -434,19 +424,18 @@ export const ProjectsPage = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Projects Grid/List */}
       {isLoading ? (
-        <div className={`grid gap-6 ${
-          viewMode === 'grid' 
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+        <div className={`grid gap-6 ${viewMode === 'grid'
+            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
             : 'grid-cols-1'
-        }`}>
+          }`}>
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="glass-card animate-pulse">
+            <Card key={i} className="glass-card">
               <CardHeader>
                 <div className="h-4 bg-surface-hover rounded w-3/4"></div>
                 <div className="h-3 bg-surface-hover rounded w-1/2"></div>
@@ -459,7 +448,7 @@ export const ProjectsPage = () => {
         </div>
       ) : (
         <>
-          {filteredProjects.length === 0 ? (
+          {filteredProjectsMemo.length === 0 ? (
             <Card className="glass-card">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <div className="text-center">
@@ -479,17 +468,15 @@ export const ProjectsPage = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className={`grid gap-6 ${
-              viewMode === 'grid' 
-                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+            <div className={`grid gap-6 ${viewMode === 'grid'
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
                 : 'grid-cols-1'
-            }`}>
-              {filteredProjects.map((project, index) => (
-                <motion.div
+              }`}>
+              {filteredProjectsMemo.map((project, index) => (
+                <div
                   key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 0.03}s` }}
                 >
                   <Card className="glass-card h-full hover:scale-105 transition-transform duration-200 group">
                     <CardHeader className="pb-4">
@@ -513,22 +500,21 @@ export const ProjectsPage = () => {
                           onClick={() => handleStar(project.id)}
                           className="p-2 h-auto glass-button hover:scale-110 transition-transform"
                         >
-                          <Star 
-                            className={`w-4 h-4 ${
-                              starredProjects.some((sp: Project) => sp.id === project.id)
+                          <Star
+                            className={`w-4 h-4 ${starredProjects.some((sp: Project) => sp.id === project.id)
                                 ? 'fill-yellow-400 text-yellow-400'
                                 : 'text-text-secondary'
-                            }`} 
+                              }`}
                           />
                         </Button>
                       </div>
                     </CardHeader>
-                    
+
                     <CardContent className="space-y-4">
                       {/* Status and Visibility */}
                       <div className="flex items-center justify-between">
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={`text-xs ${getStatusColor(project.status)}`}
                         >
                           {project.status.replace('_', ' ')}
@@ -544,9 +530,6 @@ export const ProjectsPage = () => {
                           </span>
                         </div>
                       </div>
-
-                      {/* Progress */}
-                      {/* Removed progress bar and its container */}
 
                       {/* Project Meta */}
                       <div className="flex items-center justify-between text-xs text-text-secondary">
@@ -573,7 +556,7 @@ export const ProjectsPage = () => {
                             {project.owner?.name || project.owner?.username}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center space-x-1">
                           {user && user.id !== project.ownerId && (
                             joinedProjectIds.has(project.id) ? (
@@ -611,7 +594,7 @@ export const ProjectsPage = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -623,11 +606,13 @@ export const ProjectsPage = () => {
         {editingProject && (
           <ProjectSettingsDialog
             open={!!editingProject}
-            onOpenChange={(open) => !open && setEditingProject(null)}
+            onOpenChange={handleCloseEdit}
             project={editingProject}
           />
         )}
       </Suspense>
     </div>
   );
-};
+});
+
+ProjectsPage.displayName = 'ProjectsPage';

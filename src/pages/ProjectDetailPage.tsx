@@ -7,13 +7,11 @@ import {
   Plus,
   Settings,
   Star,
-  Edit,
   Loader2,
   MessageSquare,
   Users,
   BarChart3,
   CheckSquare,
-  Share2,
   Eye,
   EyeOff,
   Calendar,
@@ -25,27 +23,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { projectsApi, tasksApi } from '@/lib/api';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useAuthStore } from '@/stores/authStore';
-import { useToast } from '@/hooks/use-toast';
-import type { Task, ProjectStatus } from '@/types';
+import { toast } from 'sonner';
+import type { Task} from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import type { User } from '@/types';
-import { useUpdateProjectStatus, useAssignTask, useUpdateTaskStatus } from '@/hooks/useOptimizedQueries';
+import { useAssignTask, useUpdateTaskStatus } from '@/hooks/useOptimizedQueries';
 import { cn } from '@/lib/utils';
 
 const TaskBoard = lazy(() => import('@/components/tasks/TaskBoard').then(module => ({ default: module.TaskBoard })));
@@ -78,10 +61,7 @@ export const ProjectDetailPage = () => {
   const [editTaskOpen, setEditTaskOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [statusChangeOpen, setStatusChangeOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState<ProjectStatus>('ACTIVE');
   const { user } = useAuthStore();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [membership, setMembership] = useState<{ isMember: boolean; isOwner: boolean; canJoin: boolean; canLeave: boolean } | null>(null);
 
@@ -107,10 +87,8 @@ export const ProjectDetailPage = () => {
       queryClient.invalidateQueries({ queryKey: ['project-members', id] });
     },
     onError: (error) => {
-      toast({
-        title: "Failed to join project",
+      toast.error("Failed to join project", {
         description: error.message || "Please try again",
-        variant: "destructive",
       });
     },
   });
@@ -123,18 +101,18 @@ export const ProjectDetailPage = () => {
       queryClient.invalidateQueries({ queryKey: ['project-members', id] });
     },
     onError: (error) => {
-      toast({
-        title: "Failed to leave project",
+      toast.error("Failed to leave project", {
         description: error.message || "Please try again",
-        variant: "destructive",
       });
     },
   });
 
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ['project', id],
-    queryFn: () => projectsApi.getById(id!),
-    enabled: !!id,
+    queryFn: () => {
+      return projectsApi.getById(id!);
+    },
+    staleTime: 0,
   });
 
   const { data: tasksResponse } = useQuery({
@@ -195,21 +173,17 @@ export const ProjectDetailPage = () => {
       tasksApi.delete(projectId, taskId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', id] });
-      toast({
-        title: 'Task deleted',
+      toast.success('Task deleted', {
         description: 'The task has been successfully deleted.',
       });
     },
     onError: (error: any) => {
-      toast({
-        title: 'Failed to delete task',
+      toast.error('Failed to delete task', {
         description: error.response?.data?.message || 'Something went wrong',
-        variant: 'destructive',
       });
     },
   });
 
-  const updateStatusMutation = useUpdateProjectStatus();
   const assignTaskMutation = useAssignTask();
   const updateTaskStatusMutation = useUpdateTaskStatus();
 
@@ -226,41 +200,19 @@ export const ProjectDetailPage = () => {
     deleteTaskMutation.mutate({ projectId: id!, taskId });
   };
 
-  const handleStatusChange = () => {
-    setStatusChangeOpen(true);
-  };
-
-  const handleUpdateStatus = () => {
-    updateStatusMutation.mutate(
-      { projectId: id!, status: newStatus },
-      {
-        onSuccess: () => {
-          setStatusChangeOpen(false);
-          toast({
-            title: 'Status updated',
-            description: 'Project status has been updated successfully.',
-          });
-        },
-      }
-    );
-  };
-
   const handleAssignTask = (taskId: string, userId: string) => {
     assignTaskMutation.mutate(
       { projectId: id!, taskId, userId },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['tasks', id] });
-          toast({
-            title: 'Task assigned',
+          toast.success('Task assigned', {
             description: 'Task has been assigned successfully.',
           });
         },
         onError: (error: any) => {
-          toast({
-            title: 'Failed to assign task',
+          toast.error('Failed to assign task', {
             description: error.response?.data?.message || 'Something went wrong',
-            variant: 'destructive',
           });
         },
       }
@@ -273,16 +225,13 @@ export const ProjectDetailPage = () => {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['tasks', id] });
-          toast({
-            title: 'Task status updated',
+          toast.success('Task status updated', {
             description: 'Task status has been updated successfully.',
           });
         },
         onError: (error: any) => {
-          toast({
-            title: 'Failed to update task status',
+          toast.error('Failed to update task status', {
             description: error.response?.data?.message || 'Something went wrong',
-            variant: 'destructive',
           });
         },
       }
@@ -290,12 +239,7 @@ export const ProjectDetailPage = () => {
   };
 
   const getProgress = () => {
-    if (project?.tasks && Array.isArray(project.tasks)) {
-      const completedTasks = project.tasks.filter((t: any) => t.status === 'DONE').length;
-      const totalTasks = project.tasks.length;
-      return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-    }
-    return project?.progress || 0;
+    return typeof project?.progressPercentage === 'number' ? Math.round(project.progressPercentage) : 0;
   };
 
   if (projectLoading) {
@@ -377,32 +321,15 @@ export const ProjectDetailPage = () => {
             >
               <Star className={cn('w-4 h-4', starredStatus ? 'fill-yellow-400 text-yellow-400' : '')} />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="glass-button"
-            >
-              <Share2 className="w-4 h-4" />
-            </Button>
-            {canEdit && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleStatusChange}
-                  className="glass-button"
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSettingsOpen(true)}
-                  className="glass-button"
-                >
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </>
+            {isOwner && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSettingsOpen(true)}
+                className="glass-button"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
             )}
           </div>
         </div>
@@ -485,71 +412,29 @@ export const ProjectDetailPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Tabs defaultValue="tasks" className="space-y-6">
-          <TabsList className="glass-card p-1 h-auto">
-            <TabsTrigger value="tasks" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
-              <CheckSquare className="w-4 h-4" />
-              <span>Tasks</span>
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
-              <MessageSquare className="w-4 h-4" />
-              <span>Chat</span>
-            </TabsTrigger>
-            <TabsTrigger value="members" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
-              <Users className="w-4 h-4" />
-              <span>Team</span>
-            </TabsTrigger>
-            <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
+        <Tabs defaultValue="overview">
+          <TabsList className="glass-card p-1 h-auto flex flex-row justify-center gap-x-4">
+            <TabsTrigger value="overview" className="flex items-center space-x-2 rounded-md px-4 py-2 border border-transparent cursor-pointer data-[state=active]:bg-background/80 data-[state=active]:border-b-2 data-[state=active]:border-accent data-[state=active]:font-bold transition">
               <Target className="w-4 h-4" />
               <span>Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center space-x-2 data-[state=active]:bg-accent/20">
+            <TabsTrigger value="members" className="flex items-center space-x-2 rounded-md px-4 py-2 border border-transparent cursor-pointer data-[state=active]:bg-background/80 data-[state=active]:border-b-2 data-[state=active]:border-accent data-[state=active]:font-bold transition">
+              <Users className="w-4 h-4" />
+              <span>Team</span>
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="flex items-center space-x-2 rounded-md px-4 py-2 border border-transparent cursor-pointer data-[state=active]:bg-background/80 data-[state=active]:border-b-2 data-[state=active]:border-accent data-[state=active]:font-bold transition">
+              <CheckSquare className="w-4 h-4" />
+              <span>Tasks</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center space-x-2 rounded-md px-4 py-2 border border-transparent cursor-pointer data-[state=active]:bg-background/80 data-[state=active]:border-b-2 data-[state=active]:border-accent data-[state=active]:font-bold transition">
               <BarChart3 className="w-4 h-4" />
               <span>Analytics</span>
             </TabsTrigger>
+            <TabsTrigger value="chat" className="flex items-center space-x-2 rounded-md px-4 py-2 border border-transparent cursor-pointer data-[state=active]:bg-background/80 data-[state=active]:border-b-2 data-[state=active]:border-accent data-[state=active]:font-bold transition">
+              <MessageSquare className="w-4 h-4" />
+              <span>Chat</span>
+            </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="tasks" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-text-primary">Tasks</h2>
-              {canEdit && (
-                <Button onClick={() => setCreateTaskOpen(true)} className="glass-button">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Task
-                </Button>
-              )}
-            </div>
-            <Suspense fallback={<ComponentLoadingFallback />}>
-              <TaskBoard
-                tasks={tasks}
-                onEditTask={handleEditTask}
-                onDeleteTask={handleDeleteTask}
-                canEdit={canEdit}
-                members={projectMembers}
-                onAssignTask={handleAssignTask}
-                onStatusChange={handleTaskStatusChange}
-              />
-            </Suspense>
-          </TabsContent>
-
-          <TabsContent value="chat" className="space-y-4">
-            <h2 className="text-2xl font-bold text-text-primary">Team Chat</h2>
-            <Suspense fallback={<ComponentLoadingFallback />}>
-              <ChatBox chatId={project?.chatId} projectId={id!} members={members} />
-            </Suspense>
-          </TabsContent>
-
-          <TabsContent value="members" className="space-y-4">
-            <h2 className="text-2xl font-bold text-text-primary">Team Members</h2>
-            <Suspense fallback={<ComponentLoadingFallback />}>
-              <ProjectMembersCard
-                projectId={id!}
-                members={projectMembers}
-                isOwner={isOwner}
-                projectOwner={project?.owner}
-              />
-            </Suspense>
-          </TabsContent>
 
           <TabsContent value="overview" className="space-y-4">
             <h2 className="text-2xl font-bold text-text-primary">Project Overview</h2>
@@ -619,10 +504,52 @@ export const ProjectDetailPage = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="members" className="space-y-4">
+            <h2 className="text-2xl font-bold text-text-primary">Team Members</h2>
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <ProjectMembersCard
+                projectId={id!}
+                members={projectMembers}
+                isOwner={isOwner}
+                projectOwner={project?.owner}
+              />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="tasks" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-text-primary">Tasks</h2>
+              {canEdit && (
+                <Button onClick={() => setCreateTaskOpen(true)} className="glass-button">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Task
+                </Button>
+              )}
+            </div>
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <TaskBoard
+                tasks={tasks}
+                onEditTask={handleEditTask}
+                onDeleteTask={handleDeleteTask}
+                canEdit={canEdit}
+                members={projectMembers}
+                onAssignTask={handleAssignTask}
+                onStatusChange={handleTaskStatusChange}
+              />
+            </Suspense>
+          </TabsContent>
+
           <TabsContent value="analytics" className="space-y-4">
             <h2 className="text-2xl font-bold text-text-primary">Analytics</h2>
             <Suspense fallback={<ComponentLoadingFallback />}>
               <AnalyticsPanel projectId={id!} />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="chat" className="space-y-4">
+            <h2 className="text-2xl font-bold text-text-primary">Team Chat</h2>
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <ChatBox chatId={project?.chatId} projectId={id!} members={members} />
             </Suspense>
           </TabsContent>
         </Tabs>
@@ -660,40 +587,6 @@ export const ProjectDetailPage = () => {
           />
         )}
       </Suspense>
-
-      {/* Status Change Dialog */}
-      <Dialog open={statusChangeOpen} onOpenChange={setStatusChangeOpen}>
-        <DialogContent className="glass-card">
-          <DialogHeader>
-            <DialogTitle className="text-text-primary">Change Project Status</DialogTitle>
-            <DialogDescription className="text-text-secondary">
-              Select the new status for this project.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Select value={newStatus} onValueChange={(value: ProjectStatus) => setNewStatus(value)}>
-              <SelectTrigger className="neu-input border-white/10">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent className="glass-card">
-                <SelectItem value="PLANNED">Planned</SelectItem>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="COMPLETED">Completed</SelectItem>
-                <SelectItem value="ON_HOLD">On Hold</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setStatusChangeOpen(false)} className="glass-button">
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateStatus} disabled={updateStatusMutation.isPending} className="glass-button">
-              {updateStatusMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Status'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
