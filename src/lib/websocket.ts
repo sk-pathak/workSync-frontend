@@ -1,5 +1,4 @@
 import './polyfills';
-import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { ErrorHandler } from './errorHandler';
 import type { Message } from '@/types';
@@ -16,7 +15,7 @@ class WebSocketService {
   private chatId: string | null = null;
   private config: WebSocketConfig | null = null;
 
-  connect(chatId: string, wsConfig: WebSocketConfig) {
+  async connect(chatId: string, wsConfig: WebSocketConfig) {
     this.chatId = chatId;
     this.config = wsConfig;
 
@@ -26,31 +25,35 @@ class WebSocketService {
       return;
     }
 
-    const socket = new SockJS(`${config.websocket.baseUrl}/ws?access_token=${token}`);
-    
-    this.client = new Client({
-      webSocketFactory: () => socket,
-      debug: () => {
-        // No-op
-      },
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
-    });
+    try {
+      const SockJS = (await import('sockjs-client')).default;
+      const socket = new SockJS(`${config.websocket.baseUrl}/ws?access_token=${token}`);
+      
+      this.client = new Client({
+        webSocketFactory: () => socket,
+        debug: () => {
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
 
-    this.client.onConnect = () => {
-      this.subscribeToChat();
-      ErrorHandler.showWebSocketConnected();
-      this.config?.onConnectionEstablished?.();
-    };
+      this.client.onConnect = () => {
+        this.subscribeToChat();
+        ErrorHandler.showWebSocketConnected();
+        this.config?.onConnectionEstablished?.();
+      };
 
-    this.client.onStompError = (frame) => {
-      console.error('STOMP Error:', frame);
-      ErrorHandler.handleWebSocketError(frame);
-      this.config?.onConnectionError?.(frame);
-    };
+      this.client.onStompError = (frame) => {
+        console.error('STOMP Error:', frame);
+        ErrorHandler.handleWebSocketError(frame);
+        this.config?.onConnectionError?.(frame);
+      };
 
-    this.client.activate();
+      this.client.activate();
+    } catch (error) {
+      console.error('Failed to load SockJS:', error);
+    }
   }
 
   private subscribeToChat() {

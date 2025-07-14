@@ -58,8 +58,17 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      const errorMessage = error.response?.data?.message || error.response?.data?.error;
+      if (errorMessage === 'TOKEN_EXPIRED') {
+        import('@/stores/authStore').then(async ({ useAuthStore }) => {
+          const logout = useAuthStore.getState().logout;
+          await logout();
+          window.location.href = '/login';
+        });
+      } else {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
     ErrorHandler.handleApiError(error, 'API Request');
     return Promise.reject(error);
@@ -104,6 +113,14 @@ export const authApi = {
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     const res = await api.post('/api/auth/register', data);
     return res.data;
+  },
+  
+  logout: async (): Promise<void> => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch (error) {
+      console.warn('Logout API call failed:', error);
+    }
   },
   
   getCurrentUser: async (): Promise<User> => {
@@ -351,25 +368,43 @@ export const notificationsApi = {
     const res = await api.get('/api/notifications');
     return res.data;
   },
-  
+
+  getDismissed: async (): Promise<PagedResponse<Notification>> => {
+    const res = await api.get('/api/notifications/dismissed');
+    return res.data;
+  },
+
+  getUnreadCount: async (): Promise<number> => {
+    const res = await api.get('/api/notifications/unread-count');
+    return res.data.unreadCount;
+  },
+
   markAsRead: async (id: string): Promise<void> => {
     clearCache('/api/notifications');
     await api.post(`/api/notifications/${id}/read`);
   },
-  
+
+  markAllAsRead: async (): Promise<void> => {
+    clearCache('/api/notifications');
+    await api.post('/api/notifications/mark-all-read');
+  },
+
   dismiss: async (id: string): Promise<void> => {
     clearCache('/api/notifications');
     await api.post(`/api/notifications/${id}/dismiss`);
+  },
+
+  dismissAll: async (): Promise<void> => {
+    clearCache('/api/notifications');
+    await api.post('/api/notifications/dismiss-all');
   },
 
   respondToJoinRequest: async (notificationId: string, accept: boolean): Promise<void> => {
     const res = await api.get(`/api/notifications`);
     const notification = res.data.content?.find((n: any) => n.id === notificationId);
     if (!notification) throw new Error('Notification not found');
-    
     const { projectId, senderId } = notification;
     if (!projectId || !senderId) throw new Error('Invalid join request notification');
-    
     if (accept) {
       await api.post(`/api/projects/${projectId}/members/${senderId}/approve`);
     } else {
