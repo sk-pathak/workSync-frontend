@@ -28,7 +28,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { projectsApi } from '@/lib/api';
 import { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface ProjectCardProps {
   project: Project;
@@ -56,7 +56,7 @@ export const ProjectCard = ({
 }: ProjectCardProps) => {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+
   const [membership, setMembership] = useState<{ isMember: boolean; isOwner: boolean; canJoin: boolean; canLeave: boolean } | null>(null);
   const [loadingMembership, setLoadingMembership] = useState(false);
 
@@ -87,10 +87,8 @@ export const ProjectCard = ({
       queryClient.invalidateQueries({ queryKey: ['projects', 'dashboard'] });
     },
     onError: (error) => {
-      toast({
-        title: "Failed to join project",
+      toast.error("Failed to join project", {
         description: error.message || "Please try again",
-        variant: "destructive",
       });
     },
   });
@@ -103,10 +101,8 @@ export const ProjectCard = ({
       queryClient.invalidateQueries({ queryKey: ['projects', 'dashboard'] });
     },
     onError: (error) => {
-      toast({
-        title: "Failed to leave project",
+      toast.error("Failed to leave project", {
         description: error.message || "Please try again",
-        variant: "destructive",
       });
     },
   });

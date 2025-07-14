@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy, memo, useMemo } from 'react';
 import { analyticsApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
@@ -11,7 +11,7 @@ const LazyTooltip = lazy(() => import('recharts').then(module => ({ default: mod
 const LazyResponsiveContainer = lazy(() => import('recharts').then(module => ({ default: module.ResponsiveContainer })));
 const LazyCartesianGrid = lazy(() => import('recharts').then(module => ({ default: module.CartesianGrid })));
 
-const ChartLoadingFallback = () => {
+const ChartLoadingFallback = memo(() => {
   return (
     <div className="flex items-center justify-center h-64">
       <div className="text-center">
@@ -20,13 +20,15 @@ const ChartLoadingFallback = () => {
       </div>
     </div>
   );
-}
+});
+
+ChartLoadingFallback.displayName = 'ChartLoadingFallback';
 
 interface AnalyticsPanelProps {
   projectId: string;
 }
 
-export const AnalyticsPanel = ({ projectId }: AnalyticsPanelProps) => {
+export const AnalyticsPanel = memo(({ projectId }: AnalyticsPanelProps) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +41,15 @@ export const AnalyticsPanel = ({ projectId }: AnalyticsPanelProps) => {
       .finally(() => setLoading(false));
   }, [projectId]);
 
+  const processedData = useMemo(() => {
+    if (!data) return null;
+
+    return {
+      stats: data.stats || {},
+      commitsOverTime: data.commitsOverTime || [],
+    };
+  }, [data]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -46,10 +57,12 @@ export const AnalyticsPanel = ({ projectId }: AnalyticsPanelProps) => {
       </div>
     );
   }
+
   if (error) {
     return <div className="text-destructive text-center py-12">{error}</div>;
   }
-  if (!data) {
+
+  if (!processedData) {
     return <div className="text-muted-foreground text-center py-12">No analytics data available.</div>;
   }
 
@@ -61,15 +74,15 @@ export const AnalyticsPanel = ({ projectId }: AnalyticsPanelProps) => {
         </CardHeader>
         <CardContent className="flex gap-8 flex-wrap">
           <div>
-            <div className="text-2xl font-bold">{data.stats?.totalCommits ?? '-'}</div>
+            <div className="text-2xl font-bold">{processedData.stats?.totalCommits ?? '-'}</div>
             <div className="text-muted-foreground">Commits</div>
           </div>
           <div>
-            <div className="text-2xl font-bold">{data.stats?.openIssues ?? '-'}</div>
+            <div className="text-2xl font-bold">{processedData.stats?.openIssues ?? '-'}</div>
             <div className="text-muted-foreground">Open Issues</div>
           </div>
           <div>
-            <div className="text-2xl font-bold">{data.stats?.contributors ?? '-'}</div>
+            <div className="text-2xl font-bold">{processedData.stats?.contributors ?? '-'}</div>
             <div className="text-muted-foreground">Contributors</div>
           </div>
         </CardContent>
@@ -79,10 +92,10 @@ export const AnalyticsPanel = ({ projectId }: AnalyticsPanelProps) => {
           <CardTitle>Commits Over Time</CardTitle>
         </CardHeader>
         <CardContent style={{ height: 300 }}>
-          {data.commitsOverTime && data.commitsOverTime.length > 0 ? (
+          {processedData.commitsOverTime && processedData.commitsOverTime.length > 0 ? (
             <Suspense fallback={<ChartLoadingFallback />}>
               <LazyResponsiveContainer width="100%" height="100%">
-                <LazyBarChart data={data.commitsOverTime} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
+                <LazyBarChart data={processedData.commitsOverTime} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
                   <LazyCartesianGrid strokeDasharray="3 3" />
                   <LazyXAxis dataKey="date" />
                   <LazyYAxis allowDecimals={false} />
@@ -98,4 +111,6 @@ export const AnalyticsPanel = ({ projectId }: AnalyticsPanelProps) => {
       </Card>
     </div>
   );
-}
+});
+
+AnalyticsPanel.displayName = 'AnalyticsPanel';

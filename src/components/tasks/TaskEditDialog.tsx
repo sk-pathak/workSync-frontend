@@ -3,13 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -24,23 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar } from 'primereact/calendar';
+
 import { tasksApi } from '@/lib/api';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { Task, UpdateTaskRequest, TaskStatus, ProjectMember } from '@/types';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
   status: z.enum(['TODO', 'IN_PROGRESS', 'DONE', 'BLOCKED']),
-  assignee_id: z.string().optional(),
-  due_date: z.string().optional(),
+  assigneeId: z.string().optional(),
+  dueDate: z.string().optional(),
   priority: z.number().min(1).max(5).optional(),
 });
 
@@ -63,7 +59,6 @@ export const TaskEditDialog = ({
   const [dueDate, setDueDate] = useState<Date | undefined>(
     task.dueDate ? new Date(task.dueDate) : undefined
   );
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const {
@@ -78,7 +73,7 @@ export const TaskEditDialog = ({
       title: task.title,
       description: task.description || '',
       status: task.status,
-      assignee_id: task.assigneeId || '',
+      assigneeId: task.assigneeId || '',
       priority: task.priority || undefined,
     },
   });
@@ -89,7 +84,7 @@ export const TaskEditDialog = ({
         title: task.title,
         description: task.description || '',
         status: task.status,
-        assignee_id: task.assigneeId || '',
+        assigneeId: task.assigneeId || '',
         priority: task.priority || undefined,
       });
       setDueDate(task.dueDate ? new Date(task.dueDate) : undefined);
@@ -100,17 +95,14 @@ export const TaskEditDialog = ({
     mutationFn: (data: UpdateTaskRequest) => tasksApi.update(task.projectId, task.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', task.projectId] });
-      toast({
-        title: 'Task updated',
+      toast.success('Task updated', {
         description: 'The task has been successfully updated.',
       });
       onOpenChange(false);
     },
     onError: (error: any) => {
-      toast({
-        title: 'Failed to update task',
+      toast.error('Failed to update task', {
         description: error.response?.data?.message || 'Something went wrong',
-        variant: 'destructive',
       });
     },
   });
@@ -127,22 +119,25 @@ export const TaskEditDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-lg bg-[#18181b] rounded-2xl shadow-2xl p-8 border border-[#27272a]">
         <DialogHeader>
-          <DialogTitle>Edit Task</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-bold text-white mb-1">Edit Task</DialogTitle>
+          <DialogDescription className="mb-4 text-gray-400">
             Update the task details below.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title" className="text-gray-300">Title *</Label>
             <Input
               id="title"
               placeholder="Enter task title"
               {...register('title')}
-              className={errors.title ? 'border-destructive' : ''}
+              className={cn(
+                'w-full px-4 py-2 rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition',
+                errors.title ? 'border-destructive' : ''
+              )}
             />
             {errors.title && (
               <p className="text-sm text-destructive">{errors.title.message}</p>
@@ -150,65 +145,44 @@ export const TaskEditDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-gray-300">Description</Label>
             <Textarea
               id="description"
               placeholder="Enter task description"
               {...register('description')}
               rows={3}
+              className="w-full px-4 py-2 rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select
-              defaultValue={task.status}
-              onValueChange={(value) => setValue('status', value as TaskStatus)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="TODO">To Do</SelectItem>
-                <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                <SelectItem value="DONE">Done</SelectItem>
-                <SelectItem value="BLOCKED">Blocked</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
             <div className="space-y-2">
-              <Label>Assignee</Label>
+              <Label className="text-gray-300">Status</Label>
               <Select
-                defaultValue={task.assigneeId || ''}
-                onValueChange={(value) => setValue('assignee_id', value)}
+                defaultValue={task.status}
+                onValueChange={(value) => setValue('status', value as TaskStatus)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select assignee" />
+                <SelectTrigger className="w-full rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition flex items-center justify-center text-center">
+                  <SelectValue className="flex items-center justify-center text-center" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {members.filter(m => m.approved).map((member) => (
-                    <SelectItem key={member.userId} value={member.userId}>
-                      {member.user?.name || member.user?.username}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="bg-[#1a0f2a] border border-[#24183a] shadow-lg rounded-md">
+                  <SelectItem value="TODO">To Do</SelectItem>
+                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                  <SelectItem value="DONE">Done</SelectItem>
+                  <SelectItem value="BLOCKED">Blocked</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
-              <Label>Priority</Label>
+              <Label className="text-gray-300">Priority</Label>
               <Select
-                defaultValue={task.priority?.toString() || ''}
-                onValueChange={(value) => setValue('priority', value ? parseInt(value) : undefined)}
+                defaultValue={task.priority ? String(task.priority) : ''}
+                onValueChange={(value) => setValue('priority', Number(value))}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
+                <SelectTrigger className="w-full rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition flex items-center justify-center text-center">
+                  <SelectValue placeholder="Select priority" className="flex items-center justify-center text-center" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No priority</SelectItem>
+                <SelectContent className="bg-[#1a0f2a] border border-[#24183a] shadow-lg rounded-md">
                   <SelectItem value="1">High</SelectItem>
                   <SelectItem value="2">Medium-High</SelectItem>
                   <SelectItem value="3">Medium</SelectItem>
@@ -217,47 +191,63 @@ export const TaskEditDialog = ({
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-gray-300">Assignee</Label>
+              <Select
+                defaultValue={task.assigneeId || ''}
+                onValueChange={(value) => setValue('assigneeId', value)}
+              >
+                <SelectTrigger className="w-full rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition flex items-center justify-center text-center">
+                  <SelectValue placeholder="Select assignee" className="flex items-center justify-center text-center" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a0f2a] border border-[#24183a] shadow-lg rounded-md">
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {members.filter(m => m.approved).map((member) => (
+                    <SelectItem key={member.userId} value={member.userId}>
+                      {member.user?.name || member.user?.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {task.assignee && (
+                <div className="flex items-center gap-2 mt-3 p-2 rounded bg-[#23232b] border border-[#27272a]">
+                  <Avatar className="w-7 h-7">
+                    <AvatarImage src={task.assignee.avatarUrl} />
+                    <AvatarFallback className="text-xs">
+                      {task.assignee.name?.charAt(0) || task.assignee.username.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm text-white font-medium">
+                    Assigned to: {task.assignee.name || task.assignee.username}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Due Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !dueDate && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dueDate ? format(dueDate, 'PPP') : 'Pick a date'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={dueDate}
-                  onSelect={setDueDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <Label className="text-gray-300">Due Date</Label>
+            <Calendar
+              value={dueDate}
+              onChange={(e: any) => setDueDate(e.value)}
+              minDate={new Date(new Date().setHours(0,0,0,0))}
+              showIcon
+              className="w-full dark"
+              inputClassName="w-full px-4 py-2 rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition"
+              panelClassName="bg-[#1a0f2a] border border-[#24183a] rounded-2xl shadow-xl"
+              dateFormat="dd/mm/yy"
+              appendTo={null}
+            />
           </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+          <div className="border-t border-[#27272a] pt-6 flex justify-end gap-3 mt-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-5 py-2 rounded-lg border border-gray-500 text-gray-300 hover:bg-[#23232b] transition">
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Update Task
+            <Button type="submit" disabled={isLoading} className="px-5 py-2 rounded-lg bg-purple-600 text-white font-semibold shadow hover:bg-purple-700 transition">
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Task'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

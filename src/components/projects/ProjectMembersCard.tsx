@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { projectsApi } from '@/lib/api';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import type { ProjectMember, User } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -43,7 +43,6 @@ export const ProjectMembersCard = ({
 }: ProjectMembersCardProps) => {
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(null);
   const { user } = useAuthStore();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const totalMembersCount = members.length;
@@ -52,17 +51,14 @@ export const ProjectMembersCard = ({
     mutationFn: (userId: string) => projectsApi.removeMember(projectId, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project-members', projectId] });
-      toast({
-        title: 'Member removed',
+      toast.success('Member removed', {
         description: 'The member has been successfully removed from the project.',
       });
       setMemberToRemove(null);
     },
     onError: (error: any) => {
-      toast({
-        title: 'Failed to remove member',
+      toast.error('Failed to remove member', {
         description: error.response?.data?.message || 'Something went wrong',
-        variant: 'destructive',
       });
     },
   });
@@ -71,16 +67,13 @@ export const ProjectMembersCard = ({
     mutationFn: (userId: string) => projectsApi.approveMember(projectId, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project-members', projectId] });
-      toast({
-        title: 'Member approved',
+      toast.success('Member approved', {
         description: 'The member has been approved and added to the project.',
       });
     },
     onError: (error: any) => {
-      toast({
-        title: 'Failed to approve member',
+      toast.error('Failed to approve member', {
         description: error.response?.data?.message || 'Something went wrong',
-        variant: 'destructive',
       });
     },
   });
