@@ -97,37 +97,30 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
 
   useEffect(() => {
     if (!chatId) return;
+    
     ChatService.connectToChat(chatId, (message: Message) => {
       addMessage(message);
     });
-    setConnected(true);
+    
+    const checkConnection = () => {
+      setConnected(ChatService.isConnected());
+    };
+    
+    checkConnection();
+    const interval = setInterval(checkConnection, 2000);
+    
     return () => {
       ChatService.disconnect();
       setConnected(false);
+      clearInterval(interval);
     };
   }, [chatId, addMessage]);
 
-  useEffect(() => {
-    if (!chatId) return;
-    let interval: NodeJS.Timeout | undefined;
-    function pollMessages() {
-      if (!chatId) return;
-      ChatService.getChatMessages(chatId)
-        .then(response => {
-          setMessagesFromPagedResponse(response);
-        })
-        .catch(error => {
-          console.error('Polling failed:', error);
-        });
-    }
-    interval = setInterval(pollMessages, 7000);
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [chatId, setMessagesFromPagedResponse]);
-
   const handleSend = () => {
-    if (!input.trim() || !connected || !user) return;
+    if (!input.trim() || !connected || !user) {
+      return;
+    }
+    
     ChatService.sendMessage(input);
     setInput('');
   };
@@ -147,7 +140,7 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
     <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Team Chat
+          Team Chat ({messages.length} messages)
           <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
         </CardTitle>
       </CardHeader>
@@ -164,13 +157,21 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
         ) : messages.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">No messages yet.</div>
         ) : (
-          messages.map((m, idx) => (
-            <div key={m.id + idx} className={m.senderId === user?.id ? 'text-right' : 'text-left'}>
-              <span className="font-semibold">{getSenderName(m)}</span>
-              <div className="inline-block bg-muted rounded px-3 py-1 ml-2">{m.content}</div>
-              <div className="text-xs text-muted-foreground">{new Date(m.sentAt).toLocaleTimeString()}</div>
-            </div>
-          ))
+          messages.map((m) => {
+            const messageKey = m.id && !m.id.startsWith('temp_') 
+              ? m.id 
+              : `${m.senderId}-${m.sentAt}-${m.content.substring(0, 10)}`;
+            
+            return (
+              <div key={messageKey} className={m.senderId === user?.id ? 'text-right' : 'text-left'}>
+                <span className="font-semibold">{getSenderName(m)}</span>
+                <div className="inline-block bg-muted rounded px-3 py-1 ml-2">{m.content}</div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(m.sentAt).toLocaleTimeString()}
+                </div>
+              </div>
+            );
+          })
         )}
         <div ref={messagesEndRef} />
       </CardContent>

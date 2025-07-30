@@ -4,6 +4,7 @@ import type { Message, PagedResponse } from '@/types';
 interface ChatState {
   messages: Message[];
   loading: boolean;
+  renderKey: number;
   pagination: {
     totalElements: number;
     totalPages: number;
@@ -21,6 +22,7 @@ interface ChatState {
 export const useChatStore = create<ChatState>((set) => ({
   messages: [],
   loading: false,
+  renderKey: 0,
   pagination: {
     totalElements: 0,
     totalPages: 0,
@@ -31,10 +33,12 @@ export const useChatStore = create<ChatState>((set) => ({
   
   setMessagesFromPagedResponse: (response) => set((state) => {
     const content = response.content ? [...response.content].reverse() : [];
-    const all = [...state.messages, ...content];
-    const deduped = Array.from(new Map(all.map(m => [m.id, m])).values());
+    const existingIds = new Set(state.messages.map(m => m.id));
+    const newMessages = content.filter(m => !existingIds.has(m.id));
+    const allMessages = [...state.messages, ...newMessages];
+    
     return {
-      messages: deduped,
+      messages: allMessages,
       pagination: {
         totalElements: response.totalElements || 0,
         totalPages: response.totalPages || 0,
@@ -45,10 +49,27 @@ export const useChatStore = create<ChatState>((set) => ({
   
   addMessage: (message) => {
     set((state) => {
-      if (state.messages.some((m) => m.id === message.id)) {
-        return {};
+      if (message.id && !message.id.startsWith('temp_')) {
+        if (state.messages.some((m) => m.id === message.id)) {
+          return state;
+        }
+      } else {
+        const recentMessages = state.messages.slice(-10);
+        const isDuplicate = recentMessages.some((m) => 
+          m.senderId === message.senderId && 
+          m.content === message.content &&
+          Math.abs(new Date(m.sentAt).getTime() - new Date(message.sentAt).getTime()) < 5000
+        );
+        
+        if (isDuplicate) {
+          return state;
+        }
       }
-      return { messages: [...state.messages, message] };
+      
+      return { 
+        messages: [...state.messages, message],
+        renderKey: state.renderKey + 1
+      };
     });
   },
   
@@ -60,10 +81,12 @@ export const useChatStore = create<ChatState>((set) => ({
 
   prependMessagesFromPagedResponse: (response) => set((state) => {
     const content = response.content ? [...response.content].reverse() : [];
-    const all = [...content, ...state.messages];
-    const deduped = Array.from(new Map(all.map(m => [m.id, m])).values());
+    const existingIds = new Set(state.messages.map(m => m.id));
+    const newMessages = content.filter(m => !existingIds.has(m.id));
+    const allMessages = [...newMessages, ...state.messages];
+    
     return {
-      messages: deduped,
+      messages: allMessages,
       pagination: {
         totalElements: response.totalElements || 0,
         totalPages: response.totalPages || 0,
