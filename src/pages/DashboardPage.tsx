@@ -54,16 +54,22 @@ export const DashboardPage = memo(() => {
   const { data: projectsResponse } = useQuery({
     queryKey: ['projects'],
     queryFn: () => projectsApi.getAll(),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: starredResponse } = useQuery({
     queryKey: ['projects', 'starred'],
     queryFn: () => userApi.getStarredProjects(),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: notificationsResponse } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => notificationsApi.getAll(),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const projects = projectsResponse?.content || [];

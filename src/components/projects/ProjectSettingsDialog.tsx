@@ -42,7 +42,7 @@ import { useNavigate } from 'react-router-dom';
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
   description: z.string().optional(),
-  status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'ON_HOLD', 'CANCELLED']),
+  status: z.enum(['ACTIVE', 'COMPLETED', 'ARCHIVED']),
   isPublic: z.boolean(),
 });
 
@@ -92,7 +92,6 @@ export const ProjectSettingsDialog = ({
       onOpenChange(false);
     },
     onError: (error: any) => {
-      console.error('Project update error:', error);
       let errorMessage = 'Something went wrong';
       
       if (error.response?.data?.message) {
@@ -106,7 +105,6 @@ export const ProjectSettingsDialog = ({
         }
       }
       
-      console.log('Processed error message:', errorMessage);
       toast.error('Failed to update project', {
         description: errorMessage,
       });
@@ -143,8 +141,6 @@ export const ProjectSettingsDialog = ({
   });
 
   const onSubmit = (data: ProjectFormData) => {
-    console.log('Form data:', data);
-    console.log('Form errors:', errors);
     setIsLoading(true);
     const payload: UpdateProjectRequest = {
       name: data.name,
@@ -152,7 +148,6 @@ export const ProjectSettingsDialog = ({
       status: data.status,
       isPublic: data.isPublic || false,
     };
-    console.log('Submitting project update:', payload);
     updateProjectMutation.mutate(payload);
     setIsLoading(false);
   };

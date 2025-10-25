@@ -22,13 +22,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { projectsApi, tasksApi } from '@/lib/api';
+import { projectsApi, tasksApi, userApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
-import type { Task} from '@/types';
+import type { Task, Project} from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import type { User } from '@/types';
-import { useAssignTask, useUpdateTaskStatus } from '@/hooks/useOptimizedQueries';
+import { useAssignTask, useUpdateTaskStatus } from '@/hooks/useQuery';
 import { cn } from '@/lib/utils';
 
 const TaskBoard = lazy(() => import('@/components/tasks/TaskBoard').then(module => ({ default: module.TaskBoard })));
@@ -48,11 +48,9 @@ const ComponentLoadingFallback = () => {
 }
 
 const statusColors = {
-  PLANNED: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
   ACTIVE: 'bg-green-500/20 text-green-400 border-green-500/30',
   COMPLETED: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  ON_HOLD: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-  CANCELLED: 'bg-red-500/20 text-red-400 border-red-500/30',
+  ARCHIVED: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
 };
 
 export const ProjectDetailPage = () => {
@@ -127,11 +125,13 @@ export const ProjectDetailPage = () => {
     enabled: !!id,
   });
 
-  const { data: starredStatus = false } = useQuery({
-    queryKey: ['project-starred', id],
-    queryFn: () => projectsApi.isStarred(id!),
-    enabled: !!id,
+  const { data: starredProjectsResponse } = useQuery({
+    queryKey: ['starred-projects'],
+    queryFn: () => userApi.getStarredProjects(),
   });
+
+  const starredProjects = starredProjectsResponse?.content || [];
+  const starredStatus = starredProjects.some((p: Project) => p.id === id);
 
   const tasks = tasksResponse?.content || [];
   const members: User[] = membersResponse?.content || [];
@@ -150,21 +150,52 @@ export const ProjectDetailPage = () => {
       return starred ? projectsApi.unstar(id!) : projectsApi.star(id!);
     },
     onMutate: async (starred) => {
-      await queryClient.cancelQueries({ queryKey: ['project-starred', id] });
-      const previousStarredStatus = queryClient.getQueryData(['project-starred', id]);
-      queryClient.setQueryData(['project-starred', id], !starred);
-      return { previousStarredStatus };
+      await queryClient.cancelQueries({ queryKey: ['starred-projects'] });
+      
+      const previousStarredProjects = queryClient.getQueryData(['starred-projects']);
+      
+      queryClient.setQueryData(['starred-projects'], (old: any) => {
+        if (!old?.content) return old;
+        if (starred) {
+          return {
+            ...old,
+            content: old.content.filter((p: Project) => p.id !== id),
+          };
+        } else {
+          if (project) {
+            return {
+              ...old,
+              content: [...old.content, project],
+            };
+          }
+        }
+        return old;
+      });
+      
+      return { previousStarredProjects };
     },
-    onError: (err, _starred, context) => {
-      if (context?.previousStarredStatus !== undefined) {
-        queryClient.setQueryData(['project-starred', id], context.previousStarredStatus);
+    onError: (_, __, context) => {
+      if (context?.previousStarredProjects !== undefined) {
+        queryClient.setQueryData(['starred-projects'], context.previousStarredProjects);
       }
-      console.error('Star mutation failed:', err);
+      toast.error('Failed to update star status');
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-starred', id] });
-      queryClient.invalidateQueries({ queryKey: ['project', id] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    onSuccess: (_, starred) => {
+      toast.success(starred ? 'Project unstarred' : 'Project starred');
+    },
+    onSettled: async () => {
+      queryClient.invalidateQueries({ 
+        queryKey: ['project', id],
+        refetchType: 'active'
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['projects'],
+        refetchType: 'active'
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['starred-projects'],
+        refetchType: 'active'
+      });
     },
   });
 

@@ -3,8 +3,8 @@ import { QueryClient } from '@tanstack/react-query';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 30 * 1000, // 30 seconds - reduced for better real-time updates
+      gcTime: 5 * 60 * 1000, // 5 minutes
       retry: (failureCount, error: any) => {
         if (error?.response?.status >= 400 && error?.response?.status < 500) {
           return false;
@@ -12,9 +12,9 @@ export const queryClient = new QueryClient({
         return failureCount < 3;
       },
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true, // Changed to true for better updates
       refetchOnReconnect: true,
-      refetchOnMount: true,
+      refetchOnMount: true, // Always refetch on mount
     },
     mutations: {
       retry: 1,
@@ -60,38 +60,44 @@ export const queryKeys = {
 export const queryConfigs = {
   user: {
     me: {
-      staleTime: 10 * 60 * 1000, // 10 minutes
-      gcTime: 30 * 60 * 1000, // 30 minutes
+      staleTime: 2 * 60 * 1000, // 2 minutes - reduced
+      gcTime: 10 * 60 * 1000, // 10 minutes
     },
     projects: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 15 * 60 * 1000, // 15 minutes
+      staleTime: 30 * 1000, // 30 seconds - much more aggressive
+      gcTime: 5 * 60 * 1000, // 5 minutes
     },
   },
   
   projects: {
     list: {
-      staleTime: 2 * 60 * 1000, // 2 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 30 * 1000, // 30 seconds - reduced from 2 minutes
+      gcTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnMount: true, // Always refetch when component mounts
+      refetchOnWindowFocus: true, // Refetch when window regains focus
     },
     detail: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 15 * 60 * 1000, // 15 minutes
+      staleTime: 1 * 60 * 1000, // 1 minute - reduced from 5 minutes
+      gcTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnMount: true,
     },
     members: {
-      staleTime: 3 * 60 * 1000, // 3 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 30 * 1000, // 30 seconds - reduced from 3 minutes
+      gcTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnMount: true,
     },
   },
   
   tasks: {
-    staleTime: 1 * 60 * 1000, // 1 minute
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds - reduced from 1 minute
+    gcTime: 3 * 60 * 1000, // 3 minutes
+    refetchOnMount: true,
   },
   
   notifications: {
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 15 * 1000, // 15 seconds - reduced from 30 seconds
+    gcTime: 1 * 60 * 1000, // 1 minute
+    refetchOnMount: true,
   },
   
   chat: {
@@ -107,29 +113,63 @@ export const queryConfigs = {
 
 export const cacheUtils = {
   invalidateProjects: () => {
-    queryClient.invalidateQueries({ queryKey: ['projects'] });
-    queryClient.invalidateQueries({ queryKey: ['project'] });
-    queryClient.invalidateQueries({ queryKey: ['user', 'owned-projects'] });
-    queryClient.invalidateQueries({ queryKey: ['user', 'joined-projects'] });
-    queryClient.invalidateQueries({ queryKey: ['user', 'starred-projects'] });
+    // Force refetch of active queries
+    queryClient.invalidateQueries({ 
+      queryKey: ['projects'],
+      refetchType: 'active' 
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: ['project'],
+      refetchType: 'active'
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: ['user', 'owned-projects'],
+      refetchType: 'active'
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: ['user', 'joined-projects'],
+      refetchType: 'active'
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: ['user', 'starred-projects'],
+      refetchType: 'active'
+    });
   },
   
   invalidateProject: (projectId: string) => {
-    queryClient.invalidateQueries({ queryKey: ['project', projectId] });
-    queryClient.invalidateQueries({ queryKey: ['project-members', projectId] });
-    queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+    queryClient.invalidateQueries({ 
+      queryKey: ['project', projectId],
+      refetchType: 'active'
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: ['project-members', projectId],
+      refetchType: 'active'
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: ['tasks', projectId],
+      refetchType: 'active'
+    });
   },
   
   invalidateProjectTasks: (projectId: string) => {
-    queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+    queryClient.invalidateQueries({ 
+      queryKey: ['tasks', projectId],
+      refetchType: 'active'
+    });
   },
   
   invalidateUser: () => {
-    queryClient.invalidateQueries({ queryKey: ['user'] });
+    queryClient.invalidateQueries({ 
+      queryKey: ['user'],
+      refetchType: 'active'
+    });
   },
   
   invalidateNotifications: () => {
-    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    queryClient.invalidateQueries({ 
+      queryKey: ['notifications'],
+      refetchType: 'active'
+    });
   },
   
   prefetchProject: async (projectId: string, fetchFn: () => Promise<any>) => {

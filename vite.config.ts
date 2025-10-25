@@ -23,7 +23,6 @@ export default defineConfig({
       'react-router-dom',
       '@tanstack/react-query',
       'framer-motion',
-      'primereact',
     ],
     exclude: [
       '@stomp/stompjs',
@@ -48,6 +47,7 @@ export default defineConfig({
       },
     } as any,
     rollupOptions: {
+      external: ['chart.js/auto', 'quill'],
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
@@ -59,10 +59,8 @@ export default defineConfig({
             '@radix-ui/react-toast',
             '@radix-ui/react-avatar',
             '@radix-ui/react-progress',
-            '@radix-ui/react-scroll-area',
             '@radix-ui/react-separator',
             '@radix-ui/react-label',
-            '@radix-ui/react-alert-dialog',
             '@radix-ui/react-slot',
             '@radix-ui/react-icons',
           ],
@@ -72,7 +70,6 @@ export default defineConfig({
           'animation-vendor': ['framer-motion'],
           'websocket-vendor': ['@stomp/stompjs'],
           'utils-vendor': ['date-fns', 'clsx', 'class-variance-authority', 'tailwind-merge'],
-          'primereact-vendor': ['primereact'],
           'theme-vendor': ['next-themes'],
           'state-vendor': ['zustand'],
         },

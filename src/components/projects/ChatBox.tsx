@@ -28,6 +28,7 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
   } = useChatStore();
   const [input, setInput] = useState('');
   const [connected, setConnected] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -49,10 +50,9 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
         setMessagesFromPagedResponse(response);
         setLoading(false);
       })
-      .catch(error => {
+      .catch(() => {
         setError('Failed to load chat messages.');
         setLoading(false);
-        console.error('Failed to load chat messages:', error);
       });
 
     return () => {
@@ -73,7 +73,7 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
           prependMessagesFromPagedResponse(response);
           setCurrentPage(response.number || nextPage);
         } catch (err) {
-          console.error('[ChatBox] Error loading older messages:', err);
+          // Failed to load older messages
         } finally {
           setLoadingMore(false);
         }
@@ -100,6 +100,18 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
     
     ChatService.connectToChat(chatId, (message: Message) => {
       addMessage(message);
+    }, {
+      onConnectionEstablished: () => {
+        setConnected(true);
+        setReconnecting(false);
+      },
+      onConnectionLost: () => {
+        setConnected(false);
+      },
+      onReconnecting: () => {
+        setReconnecting(true);
+        setConnected(false);
+      }
     });
     
     const checkConnection = () => {
@@ -112,6 +124,7 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
     return () => {
       ChatService.disconnect();
       setConnected(false);
+      setReconnecting(false);
       clearInterval(interval);
     };
   }, [chatId, addMessage]);
@@ -141,7 +154,14 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           Team Chat ({messages.length} messages)
-          <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
+          {reconnecting ? (
+            <div className="flex items-center gap-1">
+              <Loader2 className="w-3 h-3 animate-spin text-yellow-500" />
+              <span className="text-xs text-yellow-500">Reconnecting...</span>
+            </div>
+          ) : (
+            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} title={connected ? 'Connected' : 'Disconnected'} />
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent ref={messagesContainerRef} className="flex-1 overflow-y-auto space-y-2 relative">
@@ -175,8 +195,16 @@ export const ChatBox = ({ chatId: propChatId, members = [] }: ChatBoxProps) => {
         )}
         <div ref={messagesEndRef} />
       </CardContent>
-      {!connected && !loading && (
-        <div className="text-center text-yellow-500 text-xs pb-2">Disconnected. Trying to reconnect...</div>
+      {reconnecting && !loading && (
+        <div className="text-center text-yellow-500 text-xs pb-2 flex items-center justify-center gap-2">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          <span>Reconnecting to chat...</span>
+        </div>
+      )}
+      {!connected && !reconnecting && !loading && (
+        <div className="text-center text-red-500 text-xs pb-2">
+          Disconnected from chat. Please refresh the page if reconnection fails.
+        </div>
       )}
       <form
         onSubmit={e => {

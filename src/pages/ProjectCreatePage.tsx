@@ -20,7 +20,7 @@ const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
   description: z.string().optional(),
   isPublic: z.boolean(),
-  status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'ON_HOLD', 'CANCELLED']),
+  status: z.enum(['ACTIVE', 'COMPLETED', 'ARCHIVED']),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -43,14 +43,26 @@ export const ProjectCreatePage = () => {
       name: '',
       description: '',
       isPublic: false,
-      status: 'PLANNED',
+      status: 'ACTIVE',
     },
   });
 
   const createProjectMutation = useMutation({
     mutationFn: (data: CreateProjectRequest) => projectsApi.create(data),
     onSuccess: (project) => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      // Invalidate and refetch all project-related queries
+      queryClient.invalidateQueries({ 
+        queryKey: ['projects'],
+        refetchType: 'active' // Force active queries to refetch
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['user', 'owned-projects'],
+        refetchType: 'active'
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['user', 'joined-projects'],
+        refetchType: 'active'
+      });
       toast.success('Project created', {
         description: 'Your project has been created successfully.',
       });

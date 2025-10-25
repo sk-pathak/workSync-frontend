@@ -43,7 +43,6 @@ export function Sidebar() {
       });
       navigate('/login');
     } catch (error) {
-      console.error('Logout error:', error);
       navigate('/login');
     }
   };

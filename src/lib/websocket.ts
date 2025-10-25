@@ -1,4 +1,3 @@
-import './polyfills';
 import { Client } from '@stomp/stompjs';
 import { ErrorHandler } from './errorHandler';
 import type { Message } from '@/types';
@@ -9,6 +8,7 @@ interface WebSocketConfig {
   onConnectionEstablished?: () => void;
   onConnectionError?: (error: any) => void;
   onConnectionLost?: () => void;
+  onReconnecting?: () => void;
 }
 
 class WebSocketService {
@@ -17,40 +17,68 @@ class WebSocketService {
   private config: WebSocketConfig | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
+  private isManualDisconnect = false;
 
   async connect(chatId: string, wsConfig: WebSocketConfig) {
     this.chatId = chatId;
     this.config = wsConfig;
+    this.isManualDisconnect = false;
 
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('No authentication token found');
+      wsConfig.onConnectionError?.(new Error('No authentication token'));
       return;
     }
 
-    try {
+    // Disconnect existing client if any
+    if (this.client) {
+      try {
+        this.client.deactivate();
+      } catch (e) {
+        // Ignore deactivation errors
+      }
+      this.client = null;
+    }
+
+    try {      
       const SockJS = (await import('sockjs-client')).default;
-      const socket = new SockJS(`${config.websocket.baseUrl}/ws?access_token=${token}`);
+      const wsUrl = `${config.websocket.baseUrl}/ws?access_token=${token}`;
       
       this.client = new Client({
-        webSocketFactory: () => socket,
-        debug: () => {
+        webSocketFactory: () => {
+          const socket = new SockJS(wsUrl);
+          
+          socket.onerror = (err: any) => {
+            console.error('SockJS error:', err);
+          };
+          
+          return socket;
         },
-        reconnectDelay: 5000,
-        heartbeatIncoming: 4000,
-        heartbeatOutgoing: 4000,
+        reconnectDelay: 0, // We'll handle reconnection manually
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
       });
 
       this.client.onConnect = () => {
         this.reconnectAttempts = 0;
+        if (this.reconnectTimeout) {
+          clearTimeout(this.reconnectTimeout);
+          this.reconnectTimeout = null;
+        }
         this.subscribeToChat();
         ErrorHandler.showWebSocketConnected();
         this.config?.onConnectionEstablished?.();
       };
 
       this.client.onDisconnect = () => {
-        console.log('WebSocket disconnected');
         this.config?.onConnectionLost?.();
+        
+        // Only attempt reconnect if not manually disconnected
+        if (!this.isManualDisconnect) {
+          this.attemptReconnect();
+        }
       };
 
       this.client.onStompError = (frame) => {
@@ -58,16 +86,44 @@ class WebSocketService {
         ErrorHandler.handleWebSocketError(frame);
         this.config?.onConnectionError?.(frame);
         
-        this.reconnectAttempts++;
-        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-          console.error('Max reconnection attempts reached');
-        }
+        // Don't call attemptReconnect here - onDisconnect will handle it
+      };
+
+      this.client.onWebSocketError = (event) => {
+        console.error('WebSocket Error:', event);
+        this.config?.onConnectionError?.(event);
+        
+        // Don't call attemptReconnect here - onDisconnect will handle it
       };
 
       this.client.activate();
     } catch (error) {
-      console.error('Failed to load SockJS:', error);
+      console.error('Failed to create WebSocket connection:', error);
+      this.config?.onConnectionError?.(error);
+      this.attemptReconnect();
     }
+  }
+
+  private attemptReconnect() {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('Max reconnection attempts reached');
+      ErrorHandler.handleApiError(new Error('Failed to reconnect to chat after multiple attempts'));
+      return;
+    }
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+
+    this.reconnectAttempts++;
+    this.config?.onReconnecting?.();
+    
+    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);    
+    this.reconnectTimeout = setTimeout(() => {
+      if (this.chatId && this.config) {
+        this.connect(this.chatId, this.config);
+      }
+    }, delay);
   }
 
   private subscribeToChat() {
@@ -77,22 +133,23 @@ class WebSocketService {
       try {
         const rawMessageData = JSON.parse(message.body);
         
+        // Transform WebSocket message to match our Message type
         const messageData: Message = {
           id: rawMessageData.id || `temp_${Date.now()}_${Math.random()}`,
           chatId: rawMessageData.chatId,
           senderId: rawMessageData.senderId,
           content: rawMessageData.content,
           sentAt: rawMessageData.sentAt,
-          sender: rawMessageData.senderName ? {
+          sender: {
             id: rawMessageData.senderId,
             username: rawMessageData.senderUsername || '',
             email: '',
-            name: rawMessageData.senderName,
+            name: rawMessageData.senderName || rawMessageData.senderUsername || '',
             avatarUrl: rawMessageData.senderAvatarUrl,
             role: 'USER',
             createdAt: '',
             updatedAt: ''
-          } : undefined
+          }
         };
         
         if (!messageData.content || !messageData.senderId) {
@@ -101,7 +158,7 @@ class WebSocketService {
         
         this.config?.onMessageReceived(messageData);
       } catch (error) {
-        console.error('[WebSocket] Error parsing message:', error);
+        console.error('Error parsing message:', error);
       }
     });
   }
@@ -122,10 +179,22 @@ class WebSocketService {
   }
 
   disconnect() {
+    this.isManualDisconnect = true;
+    
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+    
     if (this.client) {
-      this.client.deactivate();
+      try {
+        this.client.deactivate();
+      } catch (e) {
+        console.error('Error deactivating client:', e);
+      }
       this.client = null;
     }
+    
     this.chatId = null;
     this.config = null;
     this.reconnectAttempts = 0;

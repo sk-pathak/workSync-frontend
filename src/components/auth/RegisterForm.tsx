@@ -39,8 +39,16 @@ export const RegisterForm = () => {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const response = await authApi.register(data);
-      setAuth(response.user, response.token);
+      // Register returns just the user object (201 Created)
+      await authApi.register(data);
+      
+      // After successful registration, automatically log the user in
+      const loginResponse = await authApi.login({
+        username: data.username,
+        password: data.password,
+      });
+      
+      setAuth(loginResponse.user, loginResponse.token);
       toast.success('Account created!', {
         description: 'Welcome to WorkSync. Your account has been created successfully.',
       });

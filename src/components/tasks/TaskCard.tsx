@@ -9,29 +9,31 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Task } from '@/types';
+import type { Task, ProjectMember } from '@/types';
 import { formatDistanceToNow, isFuture } from 'date-fns';
 
 interface TaskCardProps {
   task: Task;
   canEdit: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  members?: ProjectMember[];
+  onAssign?: (userId: string) => void;
   onStatusChange?: (status: string) => void;
 }
 
 const priorityColors = {
-  1: 'bg-red-600 text-red-800',
-  2: 'bg-orange-500 text-orange-900',
-  3: 'bg-yellow-400 text-yellow-900',
-  4: 'bg-blue-500 text-blue-900',
-  5: 'bg-gray-500 text-gray-900',
+  CRITICAL: 'bg-red-600 text-red-800',
+  HIGH: 'bg-orange-500 text-orange-900',
+  MEDIUM: 'bg-yellow-400 text-yellow-900',
+  LOW: 'bg-blue-500 text-blue-900',
 };
 
 const priorityLabels = {
-  1: 'High',
-  2: 'Medium-High',
-  3: 'Medium',
-  4: 'Low-Medium',
-  5: 'Low',
+  CRITICAL: 'Critical',
+  HIGH: 'High',
+  MEDIUM: 'Medium',
+  LOW: 'Low',
 };
 
 const statusOptions = [
@@ -44,11 +46,10 @@ const statusOptions = [
 export const TaskCard = ({ task, canEdit, onStatusChange }: TaskCardProps) => {
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
   const priorityColor = {
-    1: 'border-l-4 border-red-500',
-    2: 'border-l-4 border-orange-500',
-    3: 'border-l-4 border-yellow-400',
-    4: 'border-l-4 border-blue-400',
-    5: 'border-l-4 border-muted',
+    CRITICAL: 'border-l-4 border-red-500',
+    HIGH: 'border-l-4 border-orange-500',
+    MEDIUM: 'border-l-4 border-yellow-400',
+    LOW: 'border-l-4 border-blue-400',
   }[task.priority as keyof typeof priorityColors] || 'border-l-4 border-muted';
 
   const getDueDateLabel = (dueDate: string) => {
@@ -96,9 +97,9 @@ export const TaskCard = ({ task, canEdit, onStatusChange }: TaskCardProps) => {
             {/* Priority */}
             {task.priority && (
               <div className="flex items-center gap-2 mb-1">
-                <span className={`w-2 h-2 rounded-full inline-block ${priorityColors[task.priority as keyof typeof priorityColors].split(' ')[0]} mr-1`} />
-                <span className={`text-xs font-bold ${priorityColors[task.priority as keyof typeof priorityColors].split(' ')[1]}`}> {/* Vibrant color */}
-                  {priorityLabels[task.priority as keyof typeof priorityLabels]}
+                <span className={`w-2 h-2 rounded-full inline-block ${(priorityColors[task.priority as keyof typeof priorityColors] || 'bg-gray-500 text-gray-900').split(' ')[0]} mr-1`} />
+                <span className={`text-xs font-bold ${(priorityColors[task.priority as keyof typeof priorityColors] || 'bg-gray-500 text-gray-900').split(' ')[1]}`}> {/* Vibrant color */}
+                  {priorityLabels[task.priority as keyof typeof priorityLabels] || 'Unknown'}
                 </span>
               </div>
             )}

@@ -1,18 +1,14 @@
-export type ProjectStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED';
-export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'BLOCKED';
+export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
+export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
+export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type NotificationType =
-  | 'JOIN_REQUEST'
-  | 'JOIN_APPROVED'
-  | 'JOIN_REJECTED'
-  | 'MEMBER_REMOVED'
   | 'TASK_ASSIGNED'
   | 'TASK_STATUS_CHANGED'
-  | 'TASK_DUE_SOON'
-  | 'TASK_OVERDUE'
-  | 'PROJECT_UPDATED'
-  | 'PROJECT_STATUS_CHANGED'
-  | 'TASK_COMMENTED'
-  | 'MENTIONED_IN_COMMENT';
+  | 'PROJECT_INVITE'
+  | 'PROJECT_JOIN_REQUEST'
+  | 'PROJECT_JOIN_APPROVED'
+  | 'MEMBER_ADDED'
+  | 'MEMBER_REMOVED';
 export type NotificationStatus = 'PENDING' | 'READ' | 'DISMISSED';
 
 export interface User {
@@ -72,7 +68,7 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   dueDate?: string;
-  priority?: number;
+  priority?: TaskPriority;
   createdAt: string;
   updatedAt: string;
   creator?: User;
@@ -81,16 +77,11 @@ export interface Task {
 
 export interface Notification {
   id: string;
-  recipientId: string;
-  senderId?: string;
-  sender?: User | null;
-  projectId?: string;
-  project?: Project | null;
   type: NotificationType;
   status: NotificationStatus;
-  payload: string | null;
+  message: string;
+  payload: Record<string, any>;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface TaskAssignmentPayload {
@@ -98,7 +89,7 @@ export interface TaskAssignmentPayload {
   title: string;
   description?: string;
   dueDate?: string;
-  priority?: number;
+  priority?: TaskPriority;
 }
 
 export interface TaskStatusChangePayload {
@@ -134,9 +125,18 @@ export interface Message {
 
 export interface AuthResponse {
   token: string;
-  role: string;
-  expirationTime: string;
+  type: string;
+  expiresIn: number;
   user: User;
+}
+
+export interface RegisterResponse {
+  id: string;
+  username: string;
+  email: string;
+  name?: string;
+  avatarUrl?: string;
+  createdAt: string;
 }
 
 export interface LoginRequest {
@@ -172,7 +172,7 @@ export interface CreateTaskRequest {
   description?: string;
   assigneeId?: string;
   dueDate?: string;
-  priority?: number;
+  priority?: TaskPriority;
   status?: TaskStatus;
 }
 
@@ -182,7 +182,7 @@ export interface UpdateTaskRequest {
   status?: TaskStatus;
   assigneeId?: string;
   dueDate?: string;
-  priority?: number;
+  priority?: TaskPriority;
 }
 
 export interface ProjectFilters {

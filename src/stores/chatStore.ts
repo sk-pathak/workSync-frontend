@@ -58,7 +58,7 @@ export const useChatStore = create<ChatState>((set) => ({
         const isDuplicate = recentMessages.some((m) => 
           m.senderId === message.senderId && 
           m.content === message.content &&
-          Math.abs(new Date(m.sentAt).getTime() - new Date(message.sentAt).getTime()) < 5000
+          Math.abs(new Date(m.sentAt).getTime() - new Date(message.sentAt).getTime()) < 1000
         );
         
         if (isDuplicate) {

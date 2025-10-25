@@ -1,17 +1,17 @@
 export const socialConfig = {
   github: {
     name: 'GitHub',
-    url: 'https://github.com/sk-pathak',
+    url: import.meta.env.VITE_GITHUB_URL || 'https://github.com/sk-pathak',
     color: 'hover:text-gray-400'
   },
   linkedin: {
     name: 'LinkedIn',
-    url: 'https://linkedin.com/in/yourusername',
+    url: import.meta.env.VITE_LINKEDIN_URL || 'https://linkedin.com/in/yourusername',
     color: 'hover:text-blue-400'
   },
   lastfm: {
     name: 'Last.fm',
-    url: 'https://last.fm/user/Sumit2002',
+    url: import.meta.env.VITE_LASTFM_URL || 'https://last.fm/user/Sumit2002',
     color: 'hover:text-red-400'
   }
 } as const;

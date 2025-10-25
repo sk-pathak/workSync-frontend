@@ -81,7 +81,6 @@ export const SettingsPage = () => {
         description: 'Your account has been permanently deleted.',
       });
     } catch (error) {
-      console.error('Delete account error:', error);
       toast.error('Failed to delete account', {
         description: 'Please try again later.',
       });
@@ -129,7 +128,7 @@ export const SettingsPage = () => {
           <TabsList className="flex justify-center bg-transparent p-0">
             <TabsTrigger
               value="notifications"
-              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
+              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out !bg-transparent !bg-none !rounded-none !shadow-none !ring-0 outline-none focus-visible:outline-none mr-8"
             >
               <span className="inline-flex items-center justify-center bg-accent/10 rounded-full p-1 mr-3">
                 <Bell className="w-5 h-5 text-accent drop-shadow" />
@@ -138,7 +137,7 @@ export const SettingsPage = () => {
             </TabsTrigger>
             <TabsTrigger
               value="privacy"
-              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
+              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out !bg-transparent !bg-none !rounded-none !shadow-none !ring-0 outline-none focus-visible:outline-none mr-8"
             >
               <span className="inline-flex items-center justify-center bg-accent/10 rounded-full p-1 mr-3">
                 <Shield className="w-5 h-5 text-accent drop-shadow" />
@@ -147,7 +146,7 @@ export const SettingsPage = () => {
             </TabsTrigger>
             <TabsTrigger
               value="security"
-              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none mr-8"
+              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out !bg-transparent !bg-none !rounded-none !shadow-none !ring-0 outline-none focus-visible:outline-none mr-8"
             >
               <span className="inline-flex items-center justify-center bg-accent/10 rounded-full p-1 mr-3">
                 <Key className="w-5 h-5 text-accent drop-shadow" />
@@ -156,7 +155,7 @@ export const SettingsPage = () => {
             </TabsTrigger>
             <TabsTrigger
               value="account"
-              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out bg-transparent !bg-transparent bg-none !bg-none rounded-none !rounded-none shadow-none !shadow-none ring-0 !ring-0 outline-none focus-visible:outline-none"
+              className="group flex flex-row items-center cursor-pointer relative -mb-px px-8 py-1 min-w-[120px] text-text-secondary font-medium border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:!text-accent data-[state=active]:font-semibold hover:text-accent transition duration-150 ease-in-out !bg-transparent !bg-none !rounded-none !shadow-none !ring-0 outline-none focus-visible:outline-none"
             >
               <span className="inline-flex items-center justify-center bg-accent/10 rounded-full p-1 mr-3">
                 <Trash2 className="w-5 h-5 text-accent drop-shadow" />

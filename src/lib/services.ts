@@ -2,25 +2,35 @@ import { chatApi } from './api';
 import { webSocketService } from './websocket';
 import type { Message, PagedResponse } from '@/types';
 
+interface ChatConnectionCallbacks {
+  onConnectionEstablished?: () => void;
+  onConnectionLost?: () => void;
+  onConnectionError?: (error: any) => void;
+  onReconnecting?: () => void;
+}
+
 export class ChatService {
   static async getChatMessages(chatId: string, page: number = 0, size: number = 20): Promise<PagedResponse<Message>> {
     try {
       return await chatApi.getMessages(chatId, page, size);
     } catch (error) {
-      console.error('Failed to get chat messages:', error);
       throw error;
     }
   }
 
-  static connectToChat(chatId: string, onMessageReceived: (message: Message) => void) {
+  static connectToChat(
+    chatId: string, 
+    onMessageReceived: (message: Message) => void,
+    callbacks?: ChatConnectionCallbacks
+  ) {
     webSocketService.connect(chatId, {
       onMessageReceived,
-      onConnectionEstablished: () => {
-    
-      },
-      onConnectionError: (error) => {
-        console.error('Chat connection error:', error);
-      },
+      onConnectionEstablished: callbacks?.onConnectionEstablished || (() => {}),
+      onConnectionLost: callbacks?.onConnectionLost || (() => {}),
+      onConnectionError: callbacks?.onConnectionError || ((error) => {
+        console.error('WebSocket connection error', error);
+      }),
+      onReconnecting: callbacks?.onReconnecting || (() => {}),
     });
   }
 

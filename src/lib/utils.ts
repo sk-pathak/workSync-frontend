@@ -19,18 +19,4 @@ export const clearAllStores = () => {
   } catch (error) {
     console.warn('Failed to clear chat store:', error);
   }
-
-  try {
-    const { useProjectStore } = require('@/stores/projectStore');
-    useProjectStore.getState().setProjects([]);
-  } catch (error) {
-    console.warn('Failed to clear project store:', error);
-  }
-
-  try {
-    const { useTaskStore } = require('@/stores/taskStore');
-    useTaskStore.getState().clearTasks();
-  } catch (error) {
-    console.warn('Failed to clear task store:', error);
-  }
 };

@@ -23,20 +23,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from 'primereact/calendar';
-
 import { tasksApi } from '@/lib/api';
+import { DateInput } from '@/components/ui/date-input';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import type { CreateTaskRequest, ProjectMember, TaskStatus } from '@/types';
+import type { CreateTaskRequest, ProjectMember, TaskStatus, TaskPriority } from '@/types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
-  status: z.enum(['TODO', 'IN_PROGRESS', 'DONE', 'BLOCKED']),
+  status: z.enum(['TODO', 'IN_PROGRESS', 'DONE', 'CANCELLED'] as const),
   assigneeId: z.string().optional(),
-  priority: z.number().min(1).max(5).optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const).optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -164,22 +163,21 @@ export const TaskCreateDialog = ({
                   <SelectItem value="TODO">To Do</SelectItem>
                   <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
                   <SelectItem value="DONE">Done</SelectItem>
-                  <SelectItem value="BLOCKED">Blocked</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label className="text-gray-300">Priority</Label>
-              <Select onValueChange={(value) => setValue('priority', Number(value))}>
+              <Select onValueChange={(value) => setValue('priority', value as TaskPriority)}>
                 <SelectTrigger className="w-full rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition flex items-center justify-center text-center">
                   <SelectValue placeholder="Select priority" className="flex items-center justify-center text-center" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1a0f2a] border border-[#24183a] shadow-lg rounded-md">
-                  <SelectItem value="1">High</SelectItem>
-                  <SelectItem value="2">Medium-High</SelectItem>
-                  <SelectItem value="3">Medium</SelectItem>
-                  <SelectItem value="4">Low-Medium</SelectItem>
-                  <SelectItem value="5">Low</SelectItem>
+                  <SelectItem value="CRITICAL">Critical</SelectItem>
+                  <SelectItem value="HIGH">High</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
+                  <SelectItem value="LOW">Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -219,16 +217,11 @@ export const TaskCreateDialog = ({
 
           <div className="space-y-2">
             <Label className="text-gray-300">Due Date</Label>
-            <Calendar
+            <DateInput
               value={dueDate}
-              onChange={(e: any) => setDueDate(e.value)}
-              minDate={new Date(new Date().setHours(0,0,0,0))}
-              showIcon
-              className="w-full dark"
-              inputClassName="w-full px-4 py-2 rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition"
-              panelClassName="bg-[#1a0f2a] border border-[#24183a] rounded-2xl shadow-xl"
-              dateFormat="dd/mm/yy"
-              appendTo={null}
+              onChange={setDueDate}
+              min={new Date().toISOString().split('T')[0]}
+              className="w-full px-4 py-2 rounded-lg bg-[#23232b] text-white border border-[#27272a] focus:ring-2 focus:ring-purple-500 transition"
             />
           </div>
 
