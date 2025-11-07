@@ -1,46 +1,67 @@
-# workSync
+# WorkSync Frontend
 
-A modern frontend for the workSync project, built with React, TypeScript, and Tailwind CSS.
+A modern, real-time project management and collaboration platform. Think Jira meets Slack, but actually enjoyable to use.
 
-## Features
-- User authentication (login/register)
-- Project and task management
-- Real-time chat and notifications
-- Responsive, modern UI
+**Backend:** [workSync-backend](https://github.com/sk-pathak/workSync-backend)
 
-## Getting Started
+## Tech Stack
 
-### Prerequisites
-- Node.js (v16+ recommended)
-- pnpm (or npm/yarn)
+- **Framework:** React 19 + TypeScript + Vite
+- **Styling:** Tailwind CSS 4
+- **UI Components:** Radix UI + shadcn/ui
+- **State Management:** Zustand
+- **Data Fetching:** TanStack Query (React Query)
+- **Real-time:** WebSocket (STOMP over SockJS)
+- **Forms:** React Hook Form + Zod
+- **Charts:** Recharts
+- **Routing:** React Router v7
 
-### Installation
+## Setup Instructions
+
 ```bash
+# Install dependencies
 pnpm install
-```
 
-### Development
-```bash
+# Start dev server
 pnpm dev
-```
 
-### Build
-```bash
+# Build for production
 pnpm build
 ```
 
-### Preview
-```bash
-pnpm preview
-```
+> **Note:** For full architecture details, database setup, and API documentation, check out the [backend repository](https://github.com/sk-pathak/workSync-backend).
 
 ## Project Structure
-- `src/` - Main source code
-- `src/components/` - UI and feature components
-- `src/pages/` - Page-level components
-- `src/stores/` - Zustand stores for state management
-- `src/lib/` - API and utility functions
-- `public/` - Static assets
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── auth/           # Login & registration forms
+│   ├── layout/         # App layout, sidebar, footer
+│   ├── projects/       # Project-related components
+│   ├── tasks/          # Task board & dialogs
+│   └── ui/             # shadcn/ui components
+├── pages/              # Route-level pages
+│   ├── auth/           # Auth pages
+│   ├── DashboardPage.tsx
+│   ├── ProjectsPage.tsx
+│   └── ...
+├── stores/             # Zustand state stores
+├── lib/                # API client, WebSocket, utils
+├── hooks/              # Custom React hooks
+└── types/              # TypeScript type definitions
+```
+
+## Demo
+
+> **Coming soon!** Screenshots and demo GIF will be added here.
+
+<!-- Add your screenshots like this:
+![Dashboard](./docs/screenshots/dashboard.png)
+![Project Board](./docs/screenshots/project-board.png)
+![Real-time Chat](./docs/screenshots/chat.png)
+-->
 
 ## License
+
 MIT
