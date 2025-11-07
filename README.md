@@ -52,16 +52,6 @@ src/
 └── types/              # TypeScript type definitions
 ```
 
-## Demo
-
-> **Coming soon!** Screenshots and demo GIF will be added here.
-
-<!-- Add your screenshots like this:
-![Dashboard](./docs/screenshots/dashboard.png)
-![Project Board](./docs/screenshots/project-board.png)
-![Real-time Chat](./docs/screenshots/chat.png)
--->
-
 ## License
 
 MIT
